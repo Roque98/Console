@@ -1,0 +1,310 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<style>
+    .sidebar-menu__custom {
+        width: 250px;
+        background-color: #222d32;
+        height: 100%;
+        list-style: none;
+        padding: 0;
+    }
+
+        .sidebar-menu__custom > .item-header {
+            color: #4b646f;
+            background: #1a2226;
+            padding: 10px 25px 10px 15px;
+            font-size: 12px;
+        }
+
+    ul > li > a {
+        padding: 12px 15px 12px 15px;
+        display: block;
+        color: #fff;
+    }
+
+    .treeview-menu > li > a {
+        padding: 10px 15px 10px 25px;
+        display: block;
+        color: #fff;
+    }
+</style>
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper" style="display:grid; grid-template-columns: min-content 1fr; height: 100%">
+
+    <!-- Left side column. contains folder tree -->
+    <aside class="" style=" position: relative; padding-top: 0px;">
+        <!-- sidebar: style can be found in sidebar.less -->
+        <!-- Sidebar Menu -->
+        <ul class="sidebar-menu__custom" data-widget="tree">
+            <li class="item-header">Carpetas</li>
+
+            @if (Model.directorio != null)
+            {
+                <partial name="_DirectorioSidebar" model="Model.directorio" />
+            }
+        </ul>
+        <!-- /.sidebar-menu -->
+
+    </aside>
+
+    <!-- Main content -->
+    <section class="" style="margin: 20px">
+
+        <!--------------------------
+        | Your Page Content Here |
+        -------------------------->
+        @if (Model.directorio != null)
+        {
+            <div class="row">
+            <div class="col-xs-12">
+                <!-- Content Header (Page header) -->
+                <section class="content-header">
+                    <h1 id="directorio-header">
+                        @Model.directorio.Nombre
+                            <small> Tamaño: @Model.directorio.TamanioFormateado</small>
+                    </h1>
+                    <ol class="breadcrumb">
+                        @*<li><a href="#"><i class="fa fa-cloud"></i> Root</a></li>
+                        <li><a href="#">Home</a></li>
+                        <li class="active">General</li>*@
+                    </ol>
+                </section>
+            </div>
+
+            <div class="col-xs-12" style="margin-top: 20px;">
+                <div class="box">
+                    <!-- <div class="box-header">
+                      <h3 class="box-title">Data Table With Full Features</h3>
+                    </div> -->
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <table id="example2" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Tamaño</th>
+                                    <th>Tipo</th>
+                                    <th>Fecha creacion</th>
+                                    <th>Fecha actualizacion</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var subdirectorio in Model.directorio.Subdirectorios)
+                                {
+                                    <tr>
+                                        <td>@subdirectorio.Nombre</td>
+                                        <td>@subdirectorio.Tamano</td>
+                                        <td></td>
+                                        <td>@subdirectorio.FechaCreacion</td>
+                                        <td> @subdirectorio.FechaModificacion </td>
+                                        <td>
+                                            <button type="button" class="btn btn-block btn-primary" onclick="ActualizarUIDirectorio(@subdirectorio.DirectorioID)">
+                                                <i class="fa fa-folder-open-o"></i>
+                                                Ver contenido
+                                            </button> 
+                                        </td>
+                                    </tr>
+                                }
+                       
+                                @foreach (var archivo in Model.directorio.Archivos)
+                                {
+                                    <tr>
+                                        <td>@archivo.Nombre</td>
+                                        <td>@archivo.Tamano</td>
+                                        <td>@archivo.Extension</td>
+                                        <td>@archivo.FechaCreacion</td>
+                                        <td>@archivo.FechaModificacion </td>
+                                        <td></td>
+                                    </tr>
+                                }
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+            </div>
+        </div>
+        }
+    </section>
+    <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+<!-- page script -->
+<script>
+   
+    let informacionTabla = @Html.Raw(Model.dataJson.ToString());
+    
+
+    $(function () {
+        $('#example2').DataTable({
+            'paging': true,
+            'lengthChange': false,
+            'searching': true,
+            'ordering': true,
+            'info': true,
+            'autoWidth': false
+        });
+
+        if(informacionTabla != null){
+            ActualizarBreadcrumb(informacionTabla);
+            ActualizarDirectorioHeader(informacionTabla);
+            ActualizarTabla(informacionTabla);
+        }
+
+        
+    })
+
+
+
+    // Funcion para actualizar la tabla
+    function ActualizarTabla(directorio) {
+        // Obtener la referencia a la tabla DataTable
+        var table = $('#example2').DataTable();
+
+        // Limpiar las filas existentes en la tabla
+        table.clear();
+
+        // Iterar sobre los subdirectorios y agregar filas a la tabla
+        directorio.Subdirectorios.forEach(function (subdirectorio) {
+            table.row.add([
+                subdirectorio.Nombre,
+                subdirectorio.TamanioFormateado,
+                "", // Columna para el tipo de archivo
+                subdirectorio.FechaCreacion,
+                subdirectorio.FechaModificacion,
+                '<button type="button" class="btn btn-block btn-primary" onclick="ActualizarUIDirectorio(' + subdirectorio.DirectorioID + ')"><i class="fa fa-folder-open-o"></i> Ver contenido</button>'
+            ]).draw(false);
+        });
+
+        // Iterar sobre los archivos y agregar filas a la tabla
+        directorio.Archivos.forEach(function (archivo) {
+            table.row.add([
+                archivo.Nombre,
+                archivo.TamanioFormateado,
+                archivo.Extension,
+                archivo.FechaCreacion,
+                archivo.FechaModificacion,
+                "" // No hay botón para archivos
+            ]).draw(false);
+        });
+    }
+
+
+    // Funcion para obtener el directorio por id del objeto de datos
+    function ObtenerDirectorioPorId(idDirectorio, directorio) {
+        // Primero, verifica si el directorio actual coincide con el id buscado
+        if (directorio.DirectorioID === idDirectorio) {
+            return directorio;
+        }
+
+        // Luego, verifica si los subdirectorios no están vacíos
+        if (directorio.Subdirectorios && directorio.Subdirectorios.length > 0) {
+            // Itera sobre los subdirectorios y busca recursivamente el directorio con el id
+            for (var i = 0; i < directorio.Subdirectorios.length; i++) {
+                var directorioEncontrado = ObtenerDirectorioPorId(idDirectorio, directorio.Subdirectorios[i]);
+                // Si se encuentra el directorio en uno de los subdirectorios, retorna el resultado
+                if (directorioEncontrado) {
+                    return directorioEncontrado;
+                }
+            }
+        }
+
+        // Si no se encuentra el directorio en este directorio ni en sus subdirectorios, retorna null
+        return null;
+    }
+
+    // Funcion para obtener el directorio por id del objeto de datos
+    function ObtenerDirectorioPorNombre(nombreDirectorio, directorio) {
+
+        
+
+        // Primero, verifica si el directorio actual coincide con el id buscado
+        if (directorio.Nombre === nombreDirectorio) {
+            return directorio;
+        }
+
+        // Luego, verifica si los subdirectorios no están vacíos
+        if (directorio.Subdirectorios && directorio.Subdirectorios.length > 0) {
+            // Itera sobre los subdirectorios y busca recursivamente el directorio con el id
+            for (var i = 0; i < directorio.Subdirectorios.length; i++) {
+                var directorioEncontrado = ObtenerDirectorioPorNombre(nombreDirectorio, directorio.Subdirectorios[i]);
+                // Si se encuentra el directorio en uno de los subdirectorios, retorna el resultado
+                if (directorioEncontrado) {
+                    return directorioEncontrado;
+                }
+            }
+        }
+
+        // Si no se encuentra el directorio en este directorio ni en sus subdirectorios, retorna null
+        return null;
+    }
+
+
+    //  Función para obtener actualizar el header
+    function ActualizarDirectorioHeader(directorio) {
+        var header = document.getElementById("directorio-header");
+        if (header) {
+            header.innerHTML = directorio.Nombre + '<small> Tamaño: ' + directorio.TamanioFormateado + '</small>';
+        }
+    }
+
+    // Funcion para actualizar el Breadcrumb
+    function ActualizarBreadcrumb(directorio) {
+        var breadcrumb = document.querySelector(".breadcrumb");
+        if (!breadcrumb) return;
+       
+        // Limpiar el breadcrumb
+        breadcrumb.innerHTML = "";
+
+        // Agregar los elementos para cada subdirectorio en la ruta
+        directorio.Ruta.split("\\").forEach(function (nombreDirectorio) {
+            if (nombreDirectorio !== "") {
+                var directoryElement = document.createElement("li");
+                var directoryLink = document.createElement("a");
+                directoryLink.setAttribute("href", "#");
+                directoryLink.innerHTML = nombreDirectorio;
+
+
+                // Agregar el evento onclick para llamar a la función ActualizarUIDirectorio(directorioId)
+                var directorioEncontrado = ObtenerDirectorioPorNombre(nombreDirectorio, informacionTabla); // Aquí debes implementar la lógica para obtener el ID del directorio por su nombre
+               
+                if (directorioEncontrado != null) {
+                    directoryLink.onclick = function() {
+                        ActualizarUIDirectorio(directorioEncontrado.DirectorioID);
+                    };
+                }
+                
+
+                directoryElement.appendChild(directoryLink);
+                breadcrumb.appendChild(directoryElement);
+            }
+        });
+
+    }
+
+    // Funcion para actualizar el UI del directorio
+    function ActualizarUIDirectorio(directorioId){
+
+        var directorio = ObtenerDirectorioPorId(directorioId, informacionTabla);
+
+        if(directorio === null){
+            return;
+        }
+
+        if (Object.keys(directorio).length === 0) {
+            return;
+        }
+
+        ActualizarDirectorioHeader(directorio);
+        ActualizarTabla(directorio);
+        ActualizarBreadcrumb(directorio);    
+    }
+
+</script>
