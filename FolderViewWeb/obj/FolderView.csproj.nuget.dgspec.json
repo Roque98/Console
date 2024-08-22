@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\babyn\\Documents\\proyectos\\foldersView\\FolderView\\FolderViewWeb\\FolderView.csproj": {}
+    "C:\\Users\\cuent\\Documents\\repo\\Console\\FolderViewWeb\\FolderView.csproj": {}
   },
   "projects": {
-    "C:\\Users\\babyn\\Documents\\proyectos\\foldersView\\FolderView\\FolderViewWeb\\FolderView.csproj": {
+    "C:\\Users\\cuent\\Documents\\repo\\Console\\FolderViewWeb\\FolderView.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\babyn\\Documents\\proyectos\\foldersView\\FolderView\\FolderViewWeb\\FolderView.csproj",
+        "projectUniqueName": "C:\\Users\\cuent\\Documents\\repo\\Console\\FolderViewWeb\\FolderView.csproj",
         "projectName": "FolderView",
-        "projectPath": "C:\\Users\\babyn\\Documents\\proyectos\\foldersView\\FolderView\\FolderViewWeb\\FolderView.csproj",
-        "packagesPath": "C:\\Users\\babyn\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\babyn\\Documents\\proyectos\\foldersView\\FolderView\\FolderViewWeb\\obj\\",
+        "projectPath": "C:\\Users\\cuent\\Documents\\repo\\Console\\FolderViewWeb\\FolderView.csproj",
+        "packagesPath": "C:\\Users\\cuent\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\cuent\\Documents\\repo\\Console\\FolderViewWeb\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\babyn\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\cuent\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -26,7 +22,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -77,7 +72,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.102\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.400\\RuntimeIdentifierGraph.json"
         }
       }
     }

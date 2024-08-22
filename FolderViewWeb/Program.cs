@@ -9,6 +9,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<DapperContext>();
 builder.Services.AddScoped<IDirectoryRepository, DirectorioRepositorio>();
 builder.Services.AddScoped<IArchivoRepository, ArchivoRepositorio>();
+// Agregar servicios para las entidades de TipoProyecto
+builder.Services.AddScoped<ICodeGeneratorRepository, CodeGeneratorRepository>();
 builder.Services.AddControllers();
 
 var app = builder.Build();

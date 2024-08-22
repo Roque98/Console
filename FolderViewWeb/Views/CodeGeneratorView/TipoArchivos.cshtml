@@ -1,0 +1,161 @@
+﻿<!-- Views/TipoArchivo/Index.cshtml -->
+@{
+    ViewBag.Title = "Gestión de TipoArchivo";
+}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper" style="display:grid; grid-template-columns: 1fr; height: 100%">
+
+
+    <!-- Main content -->
+    <section class="" style="margin: 20px">
+        <section class="content-header">
+            <h1>Gestión de TipoArchivo</h1>
+        </section>
+
+        <section class="content">
+            <div class="box">
+                <div class="box-header">
+                    <button id="btnAdd" class="btn btn-primary" data-toggle="modal" data-target="#modalCreate">
+                        <i class="fa fa-plus"></i> Agregar TipoArchivo
+                    </button>
+                </div>
+                <div class="box-body">
+                    <table id="tipoArchivoTable" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.Id</td>
+                                    <td>@item.Nombre</td>
+                                    <td>
+                                        <button class="btn btn-warning btnEdit" data-id="@item.Id" data-toggle="modal" data-target="#modalEdit">
+                                            <i class="fa fa-edit"></i> Editar
+                                        </button>
+                                        <button class="btn btn-danger btnDelete" data-id="@item.Id">
+                                            <i class="fa fa-trash"></i> Eliminar
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal para Crear -->
+        <div class="modal fade" id="modalCreate" tabindex="-1" role="dialog" aria-labelledby="modalCreateLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="modalCreateLabel">Crear TipoArchivo</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="formCreate">
+                            <div class="form-group">
+                                <label for="createNombre">Nombre</label>
+                                <input type="text" class="form-control" id="createNombre" name="Nombre" required />
+                            </div>
+                            <button type="submit" class="btn btn-primary btnLoading" data-loading-text="Guardando...">
+                                <i class="fa fa-save"></i> Guardar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para Editar -->
+        <div class="modal fade" id="modalEdit" tabindex="-1" role="dialog" aria-labelledby="modalEditLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="modalEditLabel">Editar TipoArchivo</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="formEdit">
+                            <input type="hidden" id="editId" name="Id" />
+                            <div class="form-group">
+                                <label for="editNombre">Nombre</label>
+                                <input type="text" class="form-control" id="editNombre" name="Nombre" required />
+                            </div>
+                            <button type="submit" class="btn btn-warning btnLoading" data-loading-text="Actualizando...">
+                                <i class="fa fa-save"></i> Actualizar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+
+    <script>
+        $(document).ready(function () {
+            // Crear TipoArchivo
+            $('#formCreate').submit(function (e) {
+                e.preventDefault();
+                var $btn = $(this).find('.btnLoading').button('loading');
+                $.ajax({
+                    url: '@Url.Action("CreateTipoArchivos", "CodeGeneratorView")',
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function () {
+                        location.reload();
+                    },
+                    complete: function () {
+                        $btn.button('reset');
+                    }
+                });
+            });
+
+            // Editar TipoArchivo
+            $('.btnEdit').click(function () {
+                var id = $(this).data('id');
+                $.get('@Url.Action("GetTipoArchivosById", "CodeGeneratorView")/' + id, function (data) {
+                    $('#editId').val(data.Id);
+                    $('#editNombre').val(data.Nombre);
+                });
+            });
+
+            $('#formEdit').submit(function (e) {
+                e.preventDefault();
+                var $btn = $(this).find('.btnLoading').button('loading');
+                $.ajax({
+                    url: '@Url.Action("UpdateTipoArchivos", "CodeGeneratorView")',
+                    type: 'PUT',
+                    data: $(this).serialize(),
+                    success: function () {
+                        location.reload();
+                    },
+                    complete: function () {
+                        $btn.button('reset');
+                    }
+                });
+            });
+
+            // Eliminar TipoArchivo
+            $('.btnDelete').click(function () {
+                var id = $(this).data('id');
+                if (confirm('¿Estás seguro de que deseas eliminar este TipoArchivo?')) {
+                    $.ajax({
+                        url: '@Url.Action("DeleteTipoArchivos", "CodeGeneratorView")/' + id,
+                        type: 'DELETE',
+                        success: function () {
+                            location.reload();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
