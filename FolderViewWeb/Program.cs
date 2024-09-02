@@ -9,8 +9,14 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<DapperContext>();
 builder.Services.AddScoped<IDirectoryRepository, DirectorioRepositorio>();
 builder.Services.AddScoped<IArchivoRepository, ArchivoRepositorio>();
-// Agregar servicios para las entidades de TipoProyecto
-builder.Services.AddScoped<ICodeGeneratorRepository, CodeGeneratorRepository>();
+// Agregar servicios para las entidades de CodeGeneartor
+builder.Services.AddScoped<ITipoProyectoRepository, TipoProyectoRepository>();
+builder.Services.AddScoped<ITipoArchivoRepository, TipoArchivoRepository>();
+builder.Services.AddScoped<ITipoArchivoTipoProyectoRepository, TipoArchivoTipoProyectoRepository>();
+builder.Services.AddScoped<IProyectoRepository, ProyectoRepository>();
+builder.Services.AddScoped<IFolderRepository, FolderRepository>();
+builder.Services.AddScoped<IPromptsRepository, PromptsRepositorio>();
+builder.Services.AddScoped<IInputPromptRepository, InputPromptRepositorio>();
 builder.Services.AddControllers();
 
 var app = builder.Build();

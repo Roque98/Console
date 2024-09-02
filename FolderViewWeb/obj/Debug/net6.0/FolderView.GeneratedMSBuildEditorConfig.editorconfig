@@ -16,6 +16,10 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = C:\Users\babyn\Documents\proyectos\foldersView\FolderView\FolderViewWeb
 build_property._RazorSourceGeneratorDebug = 
 
+[C:/Users/babyn/Documents/proyectos/foldersView/FolderView/FolderViewWeb/Views/CodeGeneratorViewer/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29kZUdlbmVyYXRvclZpZXdlclxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/babyn/Documents/proyectos/foldersView/FolderView/FolderViewWeb/Views/CodeGenerator/TipoProyecto.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29kZUdlbmVyYXRvclxUaXBvUHJveWVjdG8uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
