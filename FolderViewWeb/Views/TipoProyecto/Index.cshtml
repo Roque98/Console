@@ -1,0 +1,59 @@
+﻿<!-- Content Wrapper. Contains page content -->
+
+<style>
+    .page-title {
+        font-family: 'Roboto', sans-serif; /* Fuente moderna y legible */
+        font-size: 2.5em; /* Tamaño grande para destacarse */
+        font-weight: 700; /* Negrita para mayor impacto */
+        color: #333; /* Color oscuro para buen contraste */
+        text-align: center; /* Centrando el texto */
+        margin-top: 20px; /* Espacio arriba del título */
+        margin-bottom: 20px; /* Espacio abajo del título */
+        padding: 0 15px; /* Espaciado interno lateral para evitar que el texto toque los bordes */
+        line-height: 1.2; /* Espaciado entre líneas para mejorar la legibilidad */
+        border-bottom: 2px solid #ddd; /* Línea sutil debajo del título */
+        display: inline-block; /* Alinea el título con la línea de base */
+    }
+
+    /* Estilos básicos para el ejemplo */
+    .search-container {
+        margin: 20px;
+        text-align: center;
+    }
+
+    .search-input {
+        padding: 10px;
+        font-size: 1em;
+        width: 300px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+</style>
+
+<div class="content-wrapper" >
+    <div class="page-title">Tipo proyecto</div>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar...">
+    </div>
+
+    <partial name="_cardContainer" />
+</div>
+
+<script>
+    document.getElementById('searchInput').addEventListener('input', function () {
+        const query = this.value.toLowerCase();
+        const results = document.querySelectorAll('#resultsContainer .result-item');
+
+        results.forEach(result => {
+            const text = result.textContent.toLowerCase();
+            console.log(text)
+            if (text.includes(query)) {
+                result.style.display = '';
+            } else {
+                result.style.display = 'none';
+            }
+        });
+    });
+</script>

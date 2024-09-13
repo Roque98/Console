@@ -15,22 +15,6 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = C:\Users\cuent\Documents\repo\Console\FolderViewWeb
 build_property._RazorSourceGeneratorDebug = 
 
-[C:/Users/cuent/Documents/repo/Console/FolderViewWeb/Views/CodeGeneratorView/TipoArchivos.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29kZUdlbmVyYXRvclZpZXdcVGlwb0FyY2hpdm9zLmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/cuent/Documents/repo/Console/FolderViewWeb/Views/CodeViwer/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29kZVZpd2VyXEluZGV4LmNzaHRtbA==
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/cuent/Documents/repo/Console/FolderViewWeb/Views/CodeViwer/_ArchivoSidebar.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29kZVZpd2VyXF9BcmNoaXZvU2lkZWJhci5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
-[C:/Users/cuent/Documents/repo/Console/FolderViewWeb/Views/CodeViwer/_DirectorioSidebar.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29kZVZpd2VyXF9EaXJlY3RvcmlvU2lkZWJhci5jc2h0bWw=
-build_metadata.AdditionalFiles.CssScope = 
-
 [C:/Users/cuent/Documents/repo/Console/FolderViewWeb/Views/FolderView/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRm9sZGVyVmlld1xJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -57,6 +41,22 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/cuent/Documents/repo/Console/FolderViewWeb/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/cuent/Documents/repo/Console/FolderViewWeb/Views/TipoProyecto/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGlwb1Byb3llY3RvXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/cuent/Documents/repo/Console/FolderViewWeb/Views/TipoProyecto/_addCard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGlwb1Byb3llY3RvXF9hZGRDYXJkLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/cuent/Documents/repo/Console/FolderViewWeb/Views/TipoProyecto/_card.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGlwb1Byb3llY3RvXF9jYXJkLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/cuent/Documents/repo/Console/FolderViewWeb/Views/TipoProyecto/_cardContainer.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGlwb1Byb3llY3RvXF9jYXJkQ29udGFpbmVyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/cuent/Documents/repo/Console/FolderViewWeb/Views/_ViewImports.cshtml]
