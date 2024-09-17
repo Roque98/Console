@@ -1,0 +1,72 @@
+﻿<div class="content-wrapper">
+    <div class="page-title">Proyecto</div>
+
+    <div class="search-container">
+        <input type="text" id="searchInputProyecto" class="search-input" placeholder="Buscar...">
+    </div>
+
+    <div class="card-container" id="resultsContainerProyecto">
+        <div class="add-card" id="btnAddProyecto">
+            <i class="fa fa-plus"></i>
+        </div>
+        <!-- las cards se generan aqui -->
+    </div>
+</div>
+
+<!-- Modal para agregar/editar Proyecto -->
+<div class="modal fade" id="proyectoModal" tabindex="-1" role="dialog" aria-labelledby="proyectoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="proyectoModalLabel">Agregar Proyecto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="proyectoForm">
+                    <input type="hidden" id="proyectoId" />
+                    <div class="form-group">
+                        <label for="nombreProyecto">Nombre del Proyecto</label>
+                        <input type="text" class="form-control" id="nombreProyecto" placeholder="Ingrese el nombre del proyecto" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="idTipoProyecto">Tipo de Proyecto</label>
+                        <select class="form-control" id="idTipoProyecto" required>
+                            <!-- Opciones de tipo proyecto -->
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" id="btnSaveProyecto" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        loadProyectos();
+
+        $('#btnAddProyecto').click(function () {
+            $('#proyectoModalLabel').text('Agregar Proyecto');
+            $('#proyectoForm')[0].reset();
+            $('#proyectoId').val('');
+            $('#proyectoModal').modal('show');
+        });
+
+        $('#btnSaveProyecto').click(function () {
+            // Lógica para guardar proyecto
+        });
+
+        function loadProyectos() {
+            // Lógica para cargar proyectos
+        }
+
+        $('#searchInputProyecto').on('input', function () {
+            // Lógica para filtrar resultados
+        });
+    });
+</script>

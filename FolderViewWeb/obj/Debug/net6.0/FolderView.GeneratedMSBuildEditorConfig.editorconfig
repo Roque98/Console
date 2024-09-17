@@ -20,6 +20,10 @@ build_property._RazorSourceGeneratorDebug =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29kZUdlbmVyYXRvclZpZXdlclxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/babyn/Documents/proyectos/foldersView/FolderView/FolderViewWeb/Views/CodeGeneratorViewer/Index2.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29kZUdlbmVyYXRvclZpZXdlclxJbmRleDIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/babyn/Documents/proyectos/foldersView/FolderView/FolderViewWeb/Views/CodeGenerator/TipoProyecto.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29kZUdlbmVyYXRvclxUaXBvUHJveWVjdG8uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
@@ -44,12 +48,20 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/babyn/Documents/proyectos/foldersView/FolderView/FolderViewWeb/Views/Proyecto/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJveWVjdG9cSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/babyn/Documents/proyectos/foldersView/FolderView/FolderViewWeb/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/babyn/Documents/proyectos/foldersView/FolderView/FolderViewWeb/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/babyn/Documents/proyectos/foldersView/FolderView/FolderViewWeb/Views/TipoProyecto/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGlwb1Byb3llY3RvXEluZGV4LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/babyn/Documents/proyectos/foldersView/FolderView/FolderViewWeb/Views/_ViewImports.cshtml]

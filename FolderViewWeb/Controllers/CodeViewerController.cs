@@ -10,19 +10,53 @@ namespace FolderView.Controllers
 {
     public class CodeGeneratorViewerController : Controller
     {
-        ICodeGeneratorRepository _codeGeneratorRepository;
+        IProyectoRepository _IProyectoRepository;
+        ITipoProyectoRepository _TipoProyectoRepository;
+        IPromptTemplateRepository _promptTemplateRepository;
+        IParametrosPromptTemplateRepository _parametrosPromptTemplateRepository;
 
         public CodeGeneratorViewerController(
-            ICodeGeneratorRepository codeGeneratorRepository
+            IProyectoRepository IProyectoRepository,
+            ITipoProyectoRepository TipoProyectoRepository,
+            IPromptTemplateRepository promptTemplateRepository,
+            IParametrosPromptTemplateRepository parametrosPromptTemplateRepository
         )
         {
-            _codeGeneratorRepository = codeGeneratorRepository;
+            _IProyectoRepository= IProyectoRepository;
+            _TipoProyectoRepository= TipoProyectoRepository;
+            _promptTemplateRepository = promptTemplateRepository;
+            _parametrosPromptTemplateRepository = parametrosPromptTemplateRepository;
         }
 
         public async Task<IActionResult> IndexAsync(int idProyecto)
         {
 
-            var proyecto = await _codeGeneratorRepository.GetProyectoByIdAsync(idProyecto);
+            return View();
+        }
+
+
+        public async Task<IActionResult> Index2(int idProyecto)
+        {
+
+            var proyecto = await _IProyectoRepository.GetByIdAsync(idProyecto);
+
+            if (proyecto != null)
+            {
+                proyecto.TipoProyecto = await _TipoProyectoRepository.GetByIdAsync(proyecto.IdTipoProyecto);
+
+                if (proyecto.TipoProyecto != null)
+                {
+                    proyecto.TipoProyecto.promptTemplates = await _promptTemplateRepository.GetAllByIdTipoProyectoAsync(proyecto.IdTipoProyecto);
+
+                    if (proyecto.TipoProyecto.promptTemplates != null)
+                    {
+                        foreach (var promptTemplates in proyecto.TipoProyecto.promptTemplates)
+                        {
+                            promptTemplates.ParametrosPromptTemplate = await _parametrosPromptTemplateRepository.GetAllByIdPromptTemplateAsync(promptTemplates.Id);
+                        }
+                    }
+                }
+            }
 
             return View(proyecto);
 
@@ -81,8 +115,6 @@ namespace FolderView.Controllers
             //    return StatusCode(500, ex.Message);
             //}
         }
-
-
 
 
 

@@ -1,6 +1,7 @@
 using FolderView.Dapper;
-using FolderView.Dapper.Interfaces;
 using FolderView.Dapper.Repositorios;
+using FolderView.Dapper.Interfaces;
+using FolderView.Dapper.CodeGenerator.Repositorios;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,14 +10,12 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<DapperContext>();
 builder.Services.AddScoped<IDirectoryRepository, DirectorioRepositorio>();
 builder.Services.AddScoped<IArchivoRepository, ArchivoRepositorio>();
-// Agregar servicios para las entidades de CodeGeneartor
-builder.Services.AddScoped<ITipoProyectoRepository, TipoProyectoRepository>();
-builder.Services.AddScoped<ITipoArchivoRepository, TipoArchivoRepository>();
-builder.Services.AddScoped<ITipoArchivoTipoProyectoRepository, TipoArchivoTipoProyectoRepository>();
-builder.Services.AddScoped<IProyectoRepository, ProyectoRepository>();
-builder.Services.AddScoped<IFolderRepository, FolderRepository>();
-builder.Services.AddScoped<IPromptsRepository, PromptsRepositorio>();
-builder.Services.AddScoped<IInputPromptRepository, InputPromptRepositorio>();
+// Agregar servicios para las entidades de TipoProyecto
+builder.Services.AddScoped<ITipoProyectoRepository, TipoProyectoRepositorio>();
+builder.Services.AddScoped<IProyectoRepository, ProyectoRepositorio>();
+builder.Services.AddScoped<ICodeGeneratorIArchivoRepository, CodeGeneratorArchivoRepositorio>();
+builder.Services.AddScoped<IPromptTemplateRepository, PromptTemplateRepositorio>();
+builder.Services.AddScoped<IParametrosPromptTemplateRepository, ParametrosPromptTemplateRepositorio>();
 builder.Services.AddControllers();
 
 var app = builder.Build();

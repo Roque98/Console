@@ -1,5 +1,4 @@
-﻿@model FolderView.Dapper.Entidades.ReadProyectoEntidad
-
+﻿
 <!-- Incluir highlight.js desde un CDN -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
@@ -10,34 +9,6 @@
 <script>hljs.highlightAll();</script>
 
 
-<style>
-    .sidebar-menu__custom {
-        width: 250px;
-        background-color: #222d32;
-        height: 100%;
-        list-style: none;
-        padding: 0;
-    }
-
-        .sidebar-menu__custom > .item-header {
-            color: #4b646f;
-            background: #1a2226;
-            padding: 10px 25px 10px 15px;
-            font-size: 12px;
-        }
-
-    ul > li > a {
-        padding: 12px 15px 12px 15px;
-        display: block;
-        color: #fff;
-    }
-
-    .treeview-menu > li > a {
-        padding: 10px 15px 10px 25px;
-        display: block;
-        color: #fff;
-    }
-</style>
 
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper" style="display:grid; grid-template-columns: 1fr; height: 100%">
@@ -45,103 +16,7 @@
 
     <!-- Main content -->
     <section class="" style="margin: 20px">
-
-        <!--------------------------
-        | Your Page Content Here |
-        -------------------------->
-        <div class="box box-primary">
-            <div class="box-header with-border">
-                <h3 class="box-title">Nombre proyecto: @Model.NombreProyecto</h3>
-            </div>
-            <div class="box-body">
-                <h4><strong>Tipo de Proyecto:</strong> @Model.TipoProyecto.Nombre</h4>
-                <p>@Model.TipoProyecto.Descripcion</p>
-            </div>
-        </div>
-
-        <div class="box box-info">
-            <div class="box-header with-border">
-                <h3 class="box-title">Tipo de archivos a crear</h3>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <ul class="list-group">
-                    @{ var contador = 1; }
-                    @foreach (var tipoArchivo in Model.TipoProyecto.TiposArchivosRelacion)
-                    {
-                        <li class="list-group-item">
-                            <i class="fa fa-check text-success"></i> <strong>@contador.- @tipoArchivo.tipoArchivo.Nombre: </strong>@tipoArchivo.tipoArchivo.Descripcion
-                        </li>
-
-                        contador++;
-                    }
-                    @*<li class="list-group-item">
-                        <i class="fa fa-check text-success"></i> <strong>Nombre Tipo Archivo 1:</strong> Descripción del archivo 1
-                    </li>
-                    <li class="list-group-item">
-                        <i class="fa fa-times text-danger"></i> <strong>Nombre Tipo Archivo 2:</strong> Descripción del archivo 2
-                    </li>
-                   *@
-                    <!-- Agrega más elementos según sea necesario -->
-                </ul>
-            </div>
-            <!-- /.box-body -->
-        </div>
-
-
-        <div class="box box-primary">
-            <div class="box-header with-border">
-                <h3 class="box-title">Inicio de la aplicacion</h3>
-            </div>
-            <!-- /.box-header -->
-            <!-- form start -->
-            <form id="formularioInicial">
-                <div class="box-body">
-                    <div class="form-group">
-                        <label for="inputText">Codigo sql de las tablas </label>
-                        <textarea class="form-control" id="inputText" placeholder="Escribe el codigo de la creacion de las tablas" rows="4"></textarea>
-                    </div>
-                </div>
-                <!-- /.box-body -->
-
-                <div class="box-footer">
-                    <button type="submit" class="btn btn-primary">Enviar</button>
-                </div>
-            </form>
-        </div>
-
-
-
-        <div class="row">
-            @*@foreach (var file in Model)
-            {
-
-                <h1>@file.path</h1>
-
-                <div class="col-xs-12" style="margin-top: 30px;">
-                    <button class="copy-button" onclick="copyCode(this)">Copiar</button>
-                    <button class="download-button" onclick="downloadCode(this, 'codigo.py')">Descargar</button>
-
-                    <h3>Documentacion</h3>
-                    <pre>
-                    <code class="language-python">
-                            @file.documentation
-                            </code>
-                        </pre>
-
-                    <h3>Codigo</h3>
-
-                    <pre>
-                    <code class="language-python">
-                            @file.code
-                            </code>
-                        </pre>
-                </div>
-            }*@
-
-
-
-        </div>
+        <div id="app"></div>
 
     </section>
     <!-- /.content -->
@@ -151,27 +26,226 @@
 
 <script>
 
-    $(document).ready(function() {
-        $('#formularioInicial').on('submit', function (event) {
-        event.preventDefault(); // Evita que el formulario se envíe de manera tradicional
+    // Obtener el contenedor principal
+    const app = document.getElementById("app");
 
-        let inputText = $('#inputText').val();
+    // Función para hacer una petición AJAX GET
+    function fetchData(url) {
+        return fetch(url)
+            .then(response => response.json())
+            .catch(error => console.error('Error al obtener los datos:', error));
+    }
 
-        $.ajax({
-            url: '/api/mi-endpoint', // Reemplaza con tu endpoint
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ texto: inputText }),
-            success: function(response) {
-                // Mostrar la respuesta JSON en el div
-                $('#jsonResponse').html('<strong>Respuesta:</strong> ' + JSON.stringify(response)).fadeIn();
+    // Función para hacer una petición AJAX POST
+    function sendPost(url, body) {
+        return fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
             },
-            error: function(xhr, status, error) {
-                // Manejo de errores
-                $('#jsonResponse').html('<strong>Error:</strong> ' + error).fadeIn();
-            }
+            body: JSON.stringify(body)
+        }).then(response => response.json())
+            .catch(error => console.error('Error al generar el archivo:', error));
+    }
+
+    // Función principal para iniciar la generación de formularios
+    function iniciarGeneracionArchivos(idProyecto) {
+        // Obtener la información del proyecto
+        fetchData(`/api/proyecto/${idProyecto}`).then(proyecto => {
+            const tipoProyectoId = proyecto.idTipoProyecto;
+
+            // Obtener los prompt templates del tipo de proyecto
+            fetchData(`/api/prompttemplate/all/tipoproyecto/${tipoProyectoId}`).then(promptTemplates => {
+                // Obtener los archivos ya generados para el proyecto
+                fetchData(`/api/archivo/all/proyecto/${idProyecto}`).then(archivosGenerados => {
+
+                    // Iniciar la generación de formularios
+                    generarFormulario(promptTemplates, archivosGenerados, 0, idProyecto);
+                });
+            });
         });
-    });
-});
+    }
+
+    // Función para generar el formulario basado en los prompt templates
+    function generarFormulario(promptTemplates, archivosGenerados, index, idProyecto) {
+        if (index >= promptTemplates.length) return; // Terminar si ya se generaron todos los formularios
+
+        console.log(promptTemplates)
+        const promptTemplate = promptTemplates[index];
+        const formContainer = document.createElement("div");
+        formContainer.className = "box box-primary";
+        formContainer.style.padding = 20;
+
+        // Crear la cabecera del formulario
+        const boxHeader = document.createElement("div");
+        boxHeader.className = "box-header with-border";
+
+        const heading = document.createElement("h3");
+        heading.className = "box-title";
+        heading.textContent = promptTemplates[index].nombre;
+
+        const description = document.createElement("p");
+        description.textContent = promptTemplates[index].descripcion;
+
+        boxHeader.appendChild(heading);
+        boxHeader.appendChild(description);
+
+        // Insertar la cabecera antes del cuerpo del formulario
+        formContainer.appendChild(boxHeader);
+
+        // Verificar si ya existe un archivo generado
+        const archivoGenerado = archivosGenerados.find(archivo => archivo.idPromptTemplate === promptTemplate.id);
+
+        if (archivoGenerado) {
+            // Mostrar el contenido del archivo si ya fue generado
+            const contenidoArchivo = document.createElement("div");
+            contenidoArchivo.className = "file-content";
+            contenidoArchivo.textContent = archivoGenerado.contenido;
+            formContainer.appendChild(contenidoArchivo);
+            app.appendChild(formContainer);
+
+            // Generar el siguiente formulario
+            generarFormulario(promptTemplates, archivosGenerados, index + 1, idProyecto);
+        } else {
+            // Obtener los parámetros del prompt template
+            fetchData(`/api/parametrosprompttemplate/all/prompttemplate/${promptTemplate.id}`).then(parametros => {
+                // Crear el formulario si no hay archivo generado
+                const form = document.createElement("form");
+
+                // Crear el cuerpo del formulario siguiendo el formato especificado
+                const boxBody = document.createElement("div");
+                boxBody.className = "box-body";
+
+                parametros.forEach(parametro => {
+                    const formGroup = document.createElement("div");
+                    formGroup.className = "form-group";
+
+                    const label = document.createElement("label");
+                    label.setAttribute("for", `inputText_${parametro.nombre_parametro}_${promptTemplate.id}`);
+                    label.textContent = parametro.label;
+
+                    const textarea = document.createElement("textarea");
+                    textarea.className = "form-control";
+                    textarea.id = `${parametro.nombre_parametro}${promptTemplate.id}`;
+                    textarea.name = parametro.nombre_parametro;  // Añadir el atributo name
+                    textarea.placeholder = parametro.placeholder;
+                    textarea.rows = 4;
+
+                    formGroup.appendChild(label);
+                    formGroup.appendChild(textarea);
+                    boxBody.appendChild(formGroup);
+                });
+
+                // Añadir el cuerpo del formulario al form
+                form.appendChild(boxBody);
+
+                // Crear el pie del formulario con el botón de enviar
+                const boxFooter = document.createElement("div");
+                boxFooter.className = "box-footer";
+
+                const submitButton = document.createElement("button");
+                submitButton.id = `btnSave${promptTemplate.id}`;
+                submitButton.type = "submit";
+                submitButton.className = "btn btn-primary";
+                submitButton.textContent = "Generar código";
+
+                boxFooter.appendChild(submitButton);
+                form.appendChild(boxFooter);
+
+                // Manejador del evento de envío
+                form.addEventListener("submit", function (event) {
+                    event.preventDefault();
+                    debugger;
+                    // Recolectar los datos del formulario
+                    const formData = new FormData(form);
+                    console.log(formData)
+                    const params = {};
+                    formData.forEach((value, key) => {
+                        params[key] = value;
+                    });
+
+                    // Crear el body para enviar al endpoint de generación
+                    const body = {
+                        promptTemplate: promptTemplate.prompt,
+                        params: params
+                    };
+
+                    // Enviar la petición POST para generar el archivo
+                    sendPost("http://127.0.0.1:5000/generate/", body).then(response => {
+                        debugger;
+                        // Limpiar el formulario y mostrar el contenido del archivo generado
+                        console.log(response)
+                        formContainer.innerHTML = "";
+                        //const contenidoArchivo = document.createElement("div");
+                        //contenidoArchivo.className = "file-content";
+                        //contenidoArchivo.textContent = response.code;
+                        //formContainer.appendChild(contenidoArchivo);
+
+                        // Mostrar el contenido del archivo generado
+                        const fileHeading = document.createElement("h1");
+                        fileHeading.textContent = response.path;
+
+                        const fileContentContainer = document.createElement("div");
+                        fileContentContainer.className = "";
+                        fileContentContainer.style.marginTop = "30px";
+
+                        // Botón para copiar el código
+                        const copyButton = document.createElement("button");
+                        copyButton.className = "copy-button";
+                        copyButton.textContent = "Copiar";
+                        copyButton.setAttribute("onclick", "copyCode(this)");
+
+                        // Botón para descargar el código
+                        const downloadButton = document.createElement("button");
+                        downloadButton.className = "download-button";
+                        downloadButton.textContent = "Descargar";
+                        downloadButton.setAttribute("onclick", `downloadCode(this, '${response.path}')`);
+
+                        // Documentación
+                        const docHeading = document.createElement("h3");
+                        docHeading.textContent = "Documentacion";
+
+                        const docPre = document.createElement("pre");
+                        const docCode = document.createElement("code");
+                        docCode.className = "language-python";
+                        docCode.textContent = response.documentation;
+                        docPre.appendChild(docCode);
+
+                        // Código
+                        const codeHeading = document.createElement("h3");
+                        codeHeading.textContent = "Codigo";
+
+                        const codePre = document.createElement("pre");
+                        const codeCode = document.createElement("code");
+                        codeCode.className = "language-python";
+                        codeCode.textContent = response.code;
+                        codePre.appendChild(codeCode);
+
+                        // Agregar los elementos al contenedor
+                        fileContentContainer.appendChild(copyButton);
+                        fileContentContainer.appendChild(downloadButton);
+                        fileContentContainer.appendChild(docHeading);
+                        fileContentContainer.appendChild(docPre);
+                        fileContentContainer.appendChild(codeHeading);
+                        fileContentContainer.appendChild(codePre);
+
+                        // Agregar el encabezado y el contenido al formContainer
+                        formContainer.appendChild(fileHeading);
+                        formContainer.appendChild(fileContentContainer);
+
+
+                        // Generar el siguiente formulario
+                        generarFormulario(promptTemplates, archivosGenerados, index + 1, idProyecto);
+                    });
+                });
+
+                formContainer.appendChild(form);
+                app.appendChild(formContainer);
+            });
+        }
+    }
+
+    // Iniciar la aplicación con el ID del proyecto (puedes cambiarlo dinámicamente)
+    iniciarGeneracionArchivos(1);
 
 </script>
