@@ -20,39 +20,40 @@ namespace FolderView.Controllers
             return View();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create(TipoProyectoEntidad dto)
-        {
-            var result = await _tipoProyectoRepositorio.CreateAsync(dto);
-            return Json(result);
-        }
-
-        [HttpGet("{id}")]
+        [HttpGet("api/tipoproyecto/{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _tipoProyectoRepositorio.GetByIdAsync(id);
             return Json(result);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Update(TipoProyectoEntidad dto)
+        [HttpGet("api/tipoproyecto/all")]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _tipoProyectoRepositorio.GetAllAsync();
+            return Json(result);
+        }
+
+        [HttpPost("api/tipoproyecto/create")]
+        public async Task<IActionResult> Create([FromBody] TipoProyectoEntidad dto)
+        {
+            var result = await _tipoProyectoRepositorio.CreateAsync(dto);
+            return Json(result);
+        }
+
+        [HttpPut("api/tipoproyecto/update")]
+        public async Task<IActionResult> Update([FromBody] TipoProyectoEntidad dto)
         {
             var result = await _tipoProyectoRepositorio.UpdateAsync(dto);
             return Json(result);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("api/tipoproyecto/delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _tipoProyectoRepositorio.DeleteAsync(id);
             return Json(result);
         }
-
-        [HttpGet("GetAllByIdProyecto/{id}")]
-        public async Task<IActionResult> GetAllByIdProyecto(int id)
-        {
-            var result = await _tipoProyectoRepositorio.GetAllByIdProyectoAsync(id);
-            return Json(result);
-        }
     }
+
 }

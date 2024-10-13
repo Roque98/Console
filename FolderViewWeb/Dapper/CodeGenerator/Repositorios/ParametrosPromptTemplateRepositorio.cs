@@ -17,7 +17,7 @@ namespace FolderView.Dapper.CodeGenerator.Repositorios
         {
             var query = "consolaMonitoreo..[CodeGenerator_ParametrosPromptTemplate_Add]";
             var connection = _context.CreateConnection();
-            var resultado = await connection.QueryAsync<ParametrosPromptTemplateEntidad>(query, new { dto.NombreParametro, dto.IdPromptTemplate }, commandType: CommandType.StoredProcedure);
+            var resultado = await connection.QueryAsync<ParametrosPromptTemplateEntidad>(query, new { dto.nombre_parametro, dto.IdPromptTemplate, dto.IdPromptTemplateEntrada, dto.label, dto.placeholder }, commandType: CommandType.StoredProcedure);
             return resultado.ToList();
         }
 
@@ -33,7 +33,7 @@ namespace FolderView.Dapper.CodeGenerator.Repositorios
         {
             var query = "consolaMonitoreo..[CodeGenerator_ParametrosPromptTemplate_Update]";
             var connection = _context.CreateConnection();
-            var resultado = await connection.QuerySingleOrDefaultAsync<ParametrosPromptTemplateEntidad>(query, new { dto.Id, dto.NombreParametro, dto.IdPromptTemplate }, commandType: CommandType.StoredProcedure);
+            var resultado = await connection.QuerySingleOrDefaultAsync<ParametrosPromptTemplateEntidad>(query, new { dto.Id, dto.nombre_parametro, dto.IdPromptTemplate, dto.IdPromptTemplateEntrada, dto.label, dto.placeholder }, commandType: CommandType.StoredProcedure);
             return resultado;
         }
 
@@ -45,11 +45,11 @@ namespace FolderView.Dapper.CodeGenerator.Repositorios
             return resultado;
         }
 
-        public async Task<List<ParametrosPromptTemplateEntidad>> GetAllByIdPromptTemplateAsync(int id)
+        public async Task<List<ParametrosPromptTemplateEntidad>> GetAllByIdPromptTemplateAsync(int idPromptTemplate)
         {
             var query = "consolaMonitoreo..[CodeGenerator_ParametrosPromptTemplate_GetAllByPromptTemplate]";
             var connection = _context.CreateConnection();
-            var resultado = await connection.QueryAsync<ParametrosPromptTemplateEntidad>(query, new { id }, commandType: CommandType.StoredProcedure);
+            var resultado = await connection.QueryAsync<ParametrosPromptTemplateEntidad>(query, new { idPromptTemplate }, commandType: CommandType.StoredProcedure);
             return resultado.ToList();
         }
     }

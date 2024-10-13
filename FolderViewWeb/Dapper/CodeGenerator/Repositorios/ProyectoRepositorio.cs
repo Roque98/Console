@@ -17,7 +17,7 @@ namespace FolderView.Dapper.Repositorios
         {
             var query = "consolaMonitoreo..[CodeGenerator_Proyecto_Add]";
             var connection = _context.CreateConnection();
-            var resultado = await connection.QueryAsync<ProyectoEntidad>(query, new { dto.IdTipoProyecto, dto.NombreProyecto }, commandType: CommandType.StoredProcedure);
+            var resultado = await connection.QueryAsync<ProyectoEntidad>(query, new { dto.idTipoProyecto, dto.nombreProyecto }, commandType: CommandType.StoredProcedure);
             return resultado.ToList();
         }
 
@@ -33,7 +33,7 @@ namespace FolderView.Dapper.Repositorios
         {
             var query = "consolaMonitoreo..[CodeGenerator_Proyecto_Update]";
             var connection = _context.CreateConnection();
-            var resultado = await connection.QuerySingleOrDefaultAsync<ProyectoEntidad>(query, new { dto.Id, dto.IdTipoProyecto, dto.NombreProyecto }, commandType: CommandType.StoredProcedure);
+            var resultado = await connection.QuerySingleOrDefaultAsync<ProyectoEntidad>(query, new { dto.id, dto.idTipoProyecto, dto.nombreProyecto }, commandType: CommandType.StoredProcedure);
             return resultado;
         }
 
@@ -45,11 +45,11 @@ namespace FolderView.Dapper.Repositorios
             return resultado;
         }
 
-        public async Task<List<ProyectoEntidad>> GetAllByIdTipoProyectoAsync(int id)
+        public async Task<List<ProyectoEntidad>> GetAllByIdTipoProyectoAsync(int idTipoProyecto)
         {
             var query = "consolaMonitoreo..[CodeGenerator_Proyecto_GetAllByTipoProyecto]";
             var connection = _context.CreateConnection();
-            var resultado = await connection.QueryAsync<ProyectoEntidad>(query, new { id }, commandType: CommandType.StoredProcedure);
+            var resultado = await connection.QueryAsync<ProyectoEntidad>(query, new { idTipoProyecto }, commandType: CommandType.StoredProcedure);
             return resultado.ToList();
         }
 

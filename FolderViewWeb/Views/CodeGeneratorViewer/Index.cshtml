@@ -1,177 +1,255 @@
-﻿@*@model FolderView.Dapper.Entidades.ReadProyectoEntidad
-*@
-<!-- Incluir highlight.js desde un CDN -->
+﻿<!-- Incluir highlight.js desde un CDN -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
-<!-- and it's easy to individually load additional languages -->
+<!-- Cargar un lenguaje adicional -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
 
 <script>hljs.highlightAll();</script>
 
-
-<style>
-    .sidebar-menu__custom {
-        width: 250px;
-        background-color: #222d32;
-        height: 100%;
-        list-style: none;
-        padding: 0;
-    }
-
-        .sidebar-menu__custom > .item-header {
-            color: #4b646f;
-            background: #1a2226;
-            padding: 10px 25px 10px 15px;
-            font-size: 12px;
-        }
-
-    ul > li > a {
-        padding: 12px 15px 12px 15px;
-        display: block;
-        color: #fff;
-    }
-
-    .treeview-menu > li > a {
-        padding: 10px 15px 10px 25px;
-        display: block;
-        color: #fff;
-    }
-</style>
-
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper" style="display:grid; grid-template-columns: 1fr; height: 100%">
 
-
     <!-- Main content -->
     <section class="" style="margin: 20px">
-
-        <!--------------------------
-        | Your Page Content Here |
-        -------------------------->
-        <div class="box box-primary">
-            <div class="box-header with-border">
-                <h3 class="box-title">Nombre proyecto: @Model.NombreProyecto</h3>
-            </div>
-            <div class="box-body">
-                <h4><strong>Tipo de Proyecto:</strong> @Model.TipoProyecto.Nombre</h4>
-                <p>@Model.TipoProyecto.Descripcion</p>
-            </div>
-        </div>
-
-        <div class="box box-info">
-            <div class="box-header with-border">
-                <h3 class="box-title">Tipo de archivos a crear</h3>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <ul class="list-group">
-                    @{ var contador = 1; }
-                    @foreach (var tipoArchivo in Model.TipoProyecto.TiposArchivosRelacion)
-                    {
-                        <li class="list-group-item">
-                            <i class="fa fa-check text-success"></i> <strong>@contador.- @tipoArchivo.tipoArchivo.Nombre: </strong>@tipoArchivo.tipoArchivo.Descripcion
-                        </li>
-
-                        contador++;
-                    }
-                    @*<li class="list-group-item">
-                        <i class="fa fa-check text-success"></i> <strong>Nombre Tipo Archivo 1:</strong> Descripción del archivo 1
-                    </li>
-                    <li class="list-group-item">
-                        <i class="fa fa-times text-danger"></i> <strong>Nombre Tipo Archivo 2:</strong> Descripción del archivo 2
-                    </li>
-                   *@
-                    <!-- Agrega más elementos según sea necesario -->
-                </ul>
-            </div>
-            <!-- /.box-body -->
-        </div>
-
-
-        <div class="box box-primary">
-            <div class="box-header with-border">
-                <h3 class="box-title">Inicio de la aplicacion</h3>
-            </div>
-            <!-- /.box-header -->
-            <!-- form start -->
-            <form id="formularioInicial">
-                <div class="box-body">
-                    <div class="form-group">
-                        <label for="inputText">Codigo sql de las tablas </label>
-                        <textarea class="form-control" id="inputText" placeholder="Escribe el codigo de la creacion de las tablas" rows="4"></textarea>
-                    </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col text-left">
+                    <h1 id="titulo-proyecto"></h1>
                 </div>
-                <!-- /.box-body -->
-
-                <div class="box-footer">
-                    <button type="submit" class="btn btn-primary">Enviar</button>
+            </div>
+            <div class="row">
+                <div class="col text-right">
+                    <a class="btn btn-primary" id="linkRegresar">
+                        <i class="fa fa-arrow-left"></i> Ver lista de proyectos
+                    </a>
                 </div>
-            </form>
+            </div>
         </div>
 
-
-
-        <div class="row">
-            @*@foreach (var file in Model)
-            {
-
-                <h1>@file.path</h1>
-
-                <div class="col-xs-12" style="margin-top: 30px;">
-                    <button class="copy-button" onclick="copyCode(this)">Copiar</button>
-                    <button class="download-button" onclick="downloadCode(this, 'codigo.py')">Descargar</button>
-
-                    <h3>Documentacion</h3>
-                    <pre>
-                    <code class="language-python">
-                            @file.documentation
-                            </code>
-                        </pre>
-
-                    <h3>Codigo</h3>
-
-                    <pre>
-                    <code class="language-python">
-                            @file.code
-                            </code>
-                        </pre>
-                </div>
-            }*@
-
-
-
-        </div>
-
+        <div id="app"></div>
     </section>
     <!-- /.content -->
 </div>
 <!-- /.content-wrapper -->
 
-
 <script>
+    const app = document.getElementById("app");
+    const urlParams = new URLSearchParams(window.location.search);
+    const idProyecto = urlParams.has('idProyecto') ? parseInt(urlParams.get('idProyecto')) : 0;
+    
 
-    $(document).ready(function() {
-        $('#formularioInicial').on('submit', function (event) {
-        event.preventDefault(); // Evita que el formulario se envíe de manera tradicional
 
-        let inputText = $('#inputText').val();
+    let globalState = {
+        promptTemplates: [],
+        archivosGenerados: [],
+        proyecto: {},
+        currentIndex: 0
+    };
 
-        $.ajax({
-            url: '/api/mi-endpoint', // Reemplaza con tu endpoint
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ texto: inputText }),
-            success: function(response) {
-                // Mostrar la respuesta JSON en el div
-                $('#jsonResponse').html('<strong>Respuesta:</strong> ' + JSON.stringify(response)).fadeIn();
-            },
-            error: function(xhr, status, error) {
-                // Manejo de errores
-                $('#jsonResponse').html('<strong>Error:</strong> ' + error).fadeIn();
-            }
+    iniciarGeneracionArchivos(idProyecto);
+
+    // Dentro de la función iniciarGeneracionArchivos
+    function iniciarGeneracionArchivos(idProyecto) {
+        fetchData(`/api/proyecto/${idProyecto}`).then(proyecto => {
+            globalState.proyecto = proyecto;
+            const tipoProyectoId = proyecto.idTipoProyecto;
+            const nombreProyecto = proyecto.nombreProyecto;
+            console.log(proyecto)
+            const urlRegresar = `@Url.Action("Index", "Proyecto")/Index?idTipoProyecto=${tipoProyectoId}`;
+            
+
+            // Asignar el título y la descripción del proyecto dinámicamente
+            console.log(`Nombre proyecto: ${nombreProyecto}`)
+            document.getElementById("titulo-proyecto").textContent = `Nombre proyecto: ${nombreProyecto}`; // Ajusta según la propiedad correspondiente
+            document.getElementById("linkRegresar").setAttribute("href", urlRegresar);
+
+            fetchData(`/api/prompttemplate/all/tipoproyecto/${tipoProyectoId}`).then(promptTemplates => {
+                globalState.promptTemplates = promptTemplates;
+                fetchData(`/api/archivo/all/proyecto/${idProyecto}`).then(archivosGenerados => {
+                    globalState.archivosGenerados = archivosGenerados;
+
+                    // Obtener y almacenar los parametrosPromptTemplate
+                    Promise.all(promptTemplates.map(template =>
+                        fetchData(`/api/parametrosprompttemplate/all/prompttemplate/${template.id}`)
+                    )).then(parametrosPorTemplate => {
+                        parametrosPorTemplate.forEach((parametros, index) => {
+                            globalState.promptTemplates[index].parametros = parametros;
+                        });
+                        generarFormulario();
+                    });
+                });
+            });
         });
-    });
-});
+    }
 
+    // Función para generar el formulario basado en los prompt templates
+    function generarFormulario() {
+        if (globalState.currentIndex >= globalState.promptTemplates.length) return;
+
+        const promptTemplate = globalState.promptTemplates[globalState.currentIndex];
+        const archivoGenerado = globalState.archivosGenerados.find(archivo => archivo.idPromptTemplate === promptTemplate.id);
+
+        // Inicializa idArchivoPadre
+        let idArchivoPadre = 0;
+
+        // Verifica si hay un índice anterior
+        if (globalState.currentIndex > 0) {
+            const promptTemplateAnterior = globalState.promptTemplates[globalState.currentIndex - 1];
+
+            // Filtra los archivos generados para el promptTemplate anterior
+            const archivosDelPromptTemplate = globalState.archivosGenerados
+                .filter(archivo => archivo.idPromptTemplate === promptTemplateAnterior.id);
+
+            // Si hay archivos generados, encuentra el que tiene la versión más alta
+            if (archivosDelPromptTemplate.length > 0) {
+                const archivoPadre = archivosDelPromptTemplate.reduce((prev, current) => (prev.Version > current.Version) ? prev : current);
+                idArchivoPadre = archivoPadre.Id;
+            }
+        }
+
+        let formContainerHTML = `
+            <div class="box box-primary" style="padding: 20px;">
+                <div class="box-header with-border">
+                    <h3 class="box-title">${promptTemplate.nombre}</h3>
+                    <p>${promptTemplate.descripcion}</p>
+                </div>
+        `;
+
+        if (archivoGenerado) {
+            formContainerHTML += `
+                <h1>${archivoGenerado.path}</h1>
+                <div style="margin-top: 30px;">
+                    <!-- Botones para la Documentación -->
+                    <h3>Documentacion</h3>
+                        <button class="copy-button" onclick="copyCode(this, 'documentation-${promptTemplate.id}')">Copiar Documentación</button>
+                        <button class="download-button" onclick="downloadCode(this, 'documentation-${promptTemplate.id}', 'documentacion.txt')">Descargar Documentación</button>
+                    <pre><code id="documentation-${promptTemplate.id}" class="language-python">${archivoGenerado.documentacion}</code></pre>
+                    
+                    <!-- Botones para el Código -->
+                    <h3>Codigo</h3>
+                        <button class="copy-button" onclick="copyCode(this, 'code-${promptTemplate.id}')">Copiar Código</button>
+                        <button class="download-button" onclick="downloadCode(this, 'code-${promptTemplate.id}', 'codigo.${archivoGenerado.extension}')">Descargar Código</button>
+                        <pre><code id="code-${promptTemplate.id}" class="language-python">${archivoGenerado.contenido}</code></pre>
+                </div>
+            `;
+            app.innerHTML += formContainerHTML + '</div>'; // Cerramos el contenedor aquí
+            globalState.currentIndex++;
+            generarFormulario();
+        } else {
+            const parametros = promptTemplate.parametros;
+            let formBodyHTML = '<div class="box-body">';
+
+            parametros.filter(x => x.idPromptTemplateEntrada == 0).forEach(parametro => {
+                formBodyHTML += `
+                    <div class="form-group">
+                        <label for="inputText_${parametro.nombre_parametro}_${promptTemplate.id}">${parametro.label}</label>
+                        <textarea class="form-control" id="${parametro.nombre_parametro}${promptTemplate.id}" name="${parametro.nombre_parametro}" placeholder="${parametro.placeholder}" rows="4"></textarea>
+                    </div>
+                `;
+            });
+
+            formBodyHTML += '</div>';
+
+            const formFooterHTML = `
+                <div class="box-footer">
+                    <button id="btnSave${promptTemplate.id}" type="submit" class="btn btn-primary">Generar código</button>
+                </div>
+            `;
+
+            formContainerHTML += `<form>${formBodyHTML + formFooterHTML}</form></div>`; // Cerramos el contenedor aquí
+
+            const formContainer = document.createElement('div');
+            formContainer.innerHTML = formContainerHTML;
+
+            const form = formContainer.querySelector('form');
+            if (form) {
+                form.addEventListener("submit", function (event) {
+                    event.preventDefault();
+                    const submitButton = form.querySelector("button[type='submit']");
+                    submitButton.disabled = true;
+
+                    const formData = new FormData(form);
+                    const params = {};
+                    formData.forEach((value, key) => { params[key] = value; });
+
+                    parametros.filter(parametro => parametro.idPromptTemplateEntrada != 0).forEach(parametro => {
+                        const archivoAsociado = globalState.archivosGenerados.find(a => a.idPromptTemplate === parametro.idPromptTemplateEntrada);
+                        if (archivoAsociado) {
+                            params[parametro.nombre_parametro] = archivoAsociado.contenido;
+                        }
+                    });
+
+                    const body = {
+                        promptTemplate: promptTemplate.prompt,
+                        parametros: params
+                    };
+
+
+                    // Llamada al endpoint en el controlador MVC para generar y guardar el archivo
+                    fetch(`/api/codeGenerator/?IdProyecto=${globalState.proyecto.id}&idPromptTemplate=${promptTemplate.id}&idArchivoPadre=${idArchivoPadre}`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(body)
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            submitButton.disabled = false;
+
+
+
+                            // Actualizamos el estado global con los archivos generados
+                            globalState.archivosGenerados = data;
+
+                            // Generar el próximo formulario
+                            globalState.currentIndex++;
+                            iniciarGeneracionArchivos(idProyecto);
+                            //formContainer.innerHTML = "";
+
+                        })
+                        .catch(error => {
+                            submitButton.disabled = false;
+                            console.error('Error al generar el archivo:', error);
+                        });
+                });
+
+                app.appendChild(formContainer);
+            } else {
+                console.error("El formulario no se pudo crear correctamente.");
+            }
+        }
+    }
+
+
+    // Función para copiar texto (código o documentación) al portapapeles
+    function copyCode(button, targetId) {
+        const codeElement = document.getElementById(targetId);
+        const codeText = codeElement.textContent;
+
+        const tempTextArea = document.createElement("textarea");
+        tempTextArea.value = codeText;
+        document.body.appendChild(tempTextArea);
+
+        tempTextArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempTextArea);
+        alert("Texto copiado al portapapeles");
+    }
+
+    // Función para descargar texto (código o documentación) como archivo
+    function downloadCode(button, targetId, fileName) {
+        const codeElement = document.getElementById(targetId);
+        const codeText = codeElement.textContent;
+
+        const blob = new Blob([codeText], { type: "text/plain" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 </script>

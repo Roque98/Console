@@ -20,39 +20,40 @@ namespace FolderView.Controllers
             return View();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create(PromptTemplateEntidad dto)
-        {
-            var result = await _promptTemplateRepositorio.CreateAsync(dto);
-            return Json(result);
-        }
-
-        [HttpGet("{id}")]
+        [HttpGet("api/prompttemplate/{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _promptTemplateRepositorio.GetByIdAsync(id);
             return Json(result);
         }
 
-        [HttpPut]
+        [HttpGet("api/prompttemplate/all/tipoproyecto/{id}")]
+        public async Task<IActionResult> GetAllByIdTipoProyecto(int id)
+        {
+            var result = await _promptTemplateRepositorio.GetAllByIdTipoProyectoAsync(id);
+            return Json(result);
+        }
+
+        [HttpPost("api/prompttemplate/create")]
+        public async Task<IActionResult> Create(PromptTemplateEntidad dto)
+        {
+            var result = await _promptTemplateRepositorio.CreateAsync(dto);
+            return Json(result);
+        }
+
+        [HttpPut("api/prompttemplate/update")]
         public async Task<IActionResult> Update(PromptTemplateEntidad dto)
         {
             var result = await _promptTemplateRepositorio.UpdateAsync(dto);
             return Json(result);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("api/prompttemplate/delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _promptTemplateRepositorio.DeleteAsync(id);
             return Json(result);
         }
-
-        [HttpGet("GetAllByIdTipoProyecto/{id}")]
-        public async Task<IActionResult> GetAllByIdTipoProyecto(int id)
-        {
-            var result = await _promptTemplateRepositorio.GetAllByIdTipoProyectoAsync(id);
-            return Json(result);
-        }
     }
+
 }

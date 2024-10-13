@@ -1,0 +1,77 @@
+﻿<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper" style="display:grid; grid-template-columns: 1fr; height: 100%">
+
+    <!-- Main content -->
+    <section class="" style="margin: 20px">
+        <div id="app"></div>
+    </section>
+    <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+
+
+<script>
+    // Global variables
+    const urlParams = new URLSearchParams(window.location.search); // Object to handle URL parameters
+    const app = document.getElementById("app"); // Reference to the main HTML element where content will be rendered
+    const globalState = {
+        TipoProyecto: {} // Object to store the state of the project type
+    };
+
+    // Initialize the app
+    bootstrapApp();
+
+    /**
+     * bootstrapApp - Initializes the app by fetching data for the project type and then generating the HTML page.
+     */
+    function bootstrapApp() {
+        const idTipoProyecto = getParam('idTipoProyecto'); // Get the project type ID from the URL parameters
+
+        // Fetch data for the project type by making an API call
+        fetchData(`/api/tipoproyecto/${idTipoProyecto}`).then(tipoProyecto => {
+            globalState.TipoProyecto = tipoProyecto; // Store the fetched project type data in the global state
+            console.log(globalState.TipoProyecto); // Log the fetched data for debugging purposes
+
+            generateHtmlPage(); // Generate the HTML page with the fetched data
+        });
+    }
+
+    /**
+     * getParam - Helper function to retrieve a parameter from the URL.
+     * @@param {string} keyParam - The name of the parameter to retrieve from the URL.
+     * @@returns {number} - The value of the parameter or 0 if not found.
+     */
+    function getParam(keyParam) {
+        const urlParams = new URLSearchParams(window.location.search); // Object to handle URL parameters
+        return urlParams.has(keyParam) ? parseInt(urlParams.get(keyParam)) : 0; // Return the parameter value as an integer, or 0 if not present
+    }
+
+    /**
+     * generateHtmlPage - Generates and appends the HTML for the project type page.
+     */
+    function generateHtmlPage() {
+        const headerPageElement = generateHeaderPage(globalState.TipoProyecto); // Generate the header element for the project type
+
+        app.appendChild(headerPageElement); // Append the generated HTML to the main app element
+    }
+
+    /**
+     * generateHeaderPage - Generates the HTML structure for the project type header.
+     * @@param {object} tipoProyecto - The project type object containing the name and description.
+     * @@returns {HTMLElement} - A DOM node representing the HTML structure for the header.
+     */
+    function generateHeaderPage(tipoProyecto) {
+        return generateDomNodeFromHtmlString(
+            `
+                <div class="col-xs-12">
+                    <!-- Content Header (Page header) -->
+                    <section class="content-header">
+                        <h1>Tipo proyecto: <small>${tipoProyecto.nombre}</small></h1>
+                        <p>${tipoProyecto.descripcion}</p>
+                    </section>
+                </div>
+            `
+        );
+    }
+
+</script>

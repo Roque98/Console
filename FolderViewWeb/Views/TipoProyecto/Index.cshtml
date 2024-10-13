@@ -1,59 +1,212 @@
-﻿<!-- Content Wrapper. Contains page content -->
+﻿
 
-<style>
-    .page-title {
-        font-family: 'Roboto', sans-serif; /* Fuente moderna y legible */
-        font-size: 2.5em; /* Tamaño grande para destacarse */
-        font-weight: 700; /* Negrita para mayor impacto */
-        color: #333; /* Color oscuro para buen contraste */
-        text-align: center; /* Centrando el texto */
-        margin-top: 20px; /* Espacio arriba del título */
-        margin-bottom: 20px; /* Espacio abajo del título */
-        padding: 0 15px; /* Espaciado interno lateral para evitar que el texto toque los bordes */
-        line-height: 1.2; /* Espaciado entre líneas para mejorar la legibilidad */
-        border-bottom: 2px solid #ddd; /* Línea sutil debajo del título */
-        display: inline-block; /* Alinea el título con la línea de base */
-    }
-
-    /* Estilos básicos para el ejemplo */
-    .search-container {
-        margin: 20px;
-        text-align: center;
-    }
-
-    .search-input {
-        padding: 10px;
-        font-size: 1em;
-        width: 300px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-    }
-
-</style>
-
-<div class="content-wrapper" >
-    <div class="page-title">Tipo proyecto</div>
+<div class="content-wrapper">
+    <div class="page-title">Tipo Proyecto</div>
 
     <div class="search-container">
         <input type="text" id="searchInput" class="search-input" placeholder="Buscar...">
     </div>
 
-    <partial name="_cardContainer" />
+    <div class="card-container" id="resultsContainer">
+        <div class="add-card" id="btnAdd">
+            <i class="fa fa-plus"></i>
+        </div>
+        <!-- las cards se generan aqui -->
+    </div>
 </div>
 
-<script>
-    document.getElementById('searchInput').addEventListener('input', function () {
-        const query = this.value.toLowerCase();
-        const results = document.querySelectorAll('#resultsContainer .result-item');
+<!-- Modal para agregar/editar Tipo Proyecto -->
+<div class="modal fade" id="tipoProyectoModal" tabindex="-1" role="dialog" aria-labelledby="tipoProyectoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tipoProyectoModalLabel">Agregar Tipo Proyecto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="tipoProyectoForm">
+                    <input type="hidden" id="tipoProyectoId" />
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" placeholder="Ingrese el nombre" required />
+                        <div class="invalid-feedback">
+                            El nombre es obligatorio y debe tener al menos 3 caracteres.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion">Descripción</label>
+                        <textarea class="form-control" id="descripcion" placeholder="Ingrese la descripción" required></textarea>
+                        <div class="invalid-feedback">
+                            La descripción es obligatoria.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="urlImagen">URL Imagen</label>
+                        <input type="text" class="form-control" id="urlImagen" placeholder="Ingrese la URL de la imagen" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" id="btnSave" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-        results.forEach(result => {
-            const text = result.textContent.toLowerCase();
-            console.log(text)
-            if (text.includes(query)) {
-                result.style.display = '';
+
+<script>
+    $(document).ready(function () {
+        loadTipoProyectos();
+
+        $('#btnAdd').click(function () {
+            $('#tipoProyectoModalLabel').text('Agregar Tipo Proyecto');
+            $('#tipoProyectoForm')[0].reset();
+            $('#tipoProyectoId').val('');
+            $('#tipoProyectoModal').modal('show');
+        });
+
+        $('#btnSave').click(function () {
+
+            const nombre = $('#nombre').val();
+            const descripcion = $('#descripcion').val();
+            const urlImagen = $('#urlImagen').val();
+
+            if (!nombre || nombre.length < 3) {
+                $('#nombre').addClass('is-invalid');
+                return;
             } else {
-                result.style.display = 'none';
+                $('#nombre').removeClass('is-invalid');
             }
+
+            if (!descripcion) {
+                $('#descripcion').addClass('is-invalid');
+                return;
+            } else {
+                $('#descripcion').removeClass('is-invalid');
+            }
+
+            const id = $('#tipoProyectoId').val();
+            const url = id ? `/api/tipoproyecto/update` : `/api/tipoproyecto/create`;
+            const method = id ? 'PUT' : 'POST';
+
+            $.ajax({
+                url: url,
+                type: method,
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    id: id || 0,
+                    nombre: nombre,
+                    descripcion: descripcion,
+                    urlImagen: urlImagen || ""
+                }),
+                success: function (result) {
+                    $('#tipoProyectoModal').modal('hide');
+                    loadTipoProyectos();
+                },
+                error: function (err) {
+                    console.error(err);
+                }
+            });
+        });
+
+        function loadTipoProyectos() {
+            $.ajax({
+                url: '/api/tipoproyecto/all',
+                type: 'GET',
+                success: function (data) {
+                    const resultsContainer = $('#resultsContainer');
+                    resultsContainer.find('.result-item').remove();
+                    data.forEach(function (tipoProyecto) {
+                        resultsContainer.append(`
+                            <div class="card result-item">
+                                <img src="${tipoProyecto.urlImagen || 'https://via.placeholder.com/300x150'}" alt="Imagen de la entidad">
+                                <div class="card-content">
+                                    <h3>${tipoProyecto.nombre}</h3>
+                                    <p>ID: ${tipoProyecto.id}</p>
+                                    <p>${tipoProyecto.descripcion}</p>
+                                    <div class="dates">
+                                        <p>Fecha de Creación: ${new Date(tipoProyecto.fechaCreacion).toLocaleDateString()}</p>
+                                        <p>Fecha de Modificación: ${new Date(tipoProyecto.fechaModificacion).toLocaleDateString()}</p>
+
+                                            <a href="@Url.Action("Index", "Proyecto")/Index?idTipoProyecto=${tipoProyecto.id}" class="btn btn-info btnEdit" data-id="${tipoProyecto.id}">
+                                            <i class="fa fa-folder-open"></i> PROYECTOS
+                                        </a>
+
+                                        <button class="btn btn-warning btnEdit" data-id="${tipoProyecto.id}">
+                                            <i class="fa fa-pencil"></i> Editar
+                                        </button>
+
+                                        <button class="btn btn-danger btnDelete" data-id="${tipoProyecto.id}">
+                                            <i class="fa fa-trash"></i> Eliminar
+                                        </button>
+
+                                             <a class="btn btn-info" href="@Url.Action("Index", "PromptTemplate")/Index?idTipoProyecto=${tipoProyecto.id}">
+                                                <i class="fa fa-code-fork"></i> Prompt templates
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+                        `);
+                    });
+
+                    $('.btnEdit').click(function () {
+                        const id = $(this).data('id');
+                        editTipoProyecto(id);
+                    });
+
+                    $('.btnDelete').click(function () {
+                        const id = $(this).data('id');
+                        deleteTipoProyecto(id);
+                    });
+                }
+            });
+        }
+
+        function editTipoProyecto(id) {
+            $.ajax({
+                url: `/api/tipoproyecto/${id}`,
+                type: 'GET',
+                success: function (data) {
+                    $('#tipoProyectoModalLabel').text('Editar Tipo Proyecto');
+                    $('#tipoProyectoId').val(data.id);
+                    $('#nombre').val(data.nombre);
+                    $('#descripcion').val(data.descripcion);
+                    $('#urlImagen').val(data.urlImagen);
+                    $('#tipoProyectoModal').modal('show');
+                },
+                error: function (err) {
+                    console.error(err);
+                }
+            });
+        }
+
+        function deleteTipoProyecto(id) {
+            if (confirm('¿Está seguro de que desea eliminar este tipo de proyecto?')) {
+                $.ajax({
+                    url: `/api/tipoproyecto/delete/${id}`,
+                    type: 'DELETE',
+                    success: function () {
+                        loadTipoProyectos();
+                    },
+                    error: function (err) {
+                        console.error(err);
+                    }
+                });
+            }
+        }
+
+        $('#searchInput').on('input', function () {
+            const query = this.value.toLowerCase();
+            const results = document.querySelectorAll('#resultsContainer .result-item');
+            results.forEach(result => {
+                const text = result.textContent.toLowerCase();
+                result.style.display = text.includes(query) ? '' : 'none';
+            });
         });
     });
+
 </script>

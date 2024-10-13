@@ -1,0 +1,168 @@
+﻿@{
+    ViewData["Title"] = "Plantilla de Prompt";
+}  <div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+            Plantilla de Prompt
+            <small>CRUD</small>
+        </h1>
+    </section>      <section class="content">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Lista de Plantillas de Prompt</h3>
+                <button id="btnAdd" class="btn btn-primary pull-right">Agregar Plantilla de Prompt</button>
+            </div>
+            <div class="box-body">
+                <table id="promptTemplateTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>  <!-- Modal para agregar/editar Plantilla de Prompt --> <div class="modal fade" id="promptTemplateModal" tabindex="-1" role="dialog" aria-labelledby="promptTemplateModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="promptTemplateModalLabel">Agregar Plantilla de Prompt</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="promptTemplateForm">
+                    <input type="hidden" id="promptTemplateId" />
+                    <div class="form-group">
+                        <label for="nombre">Nombre</label>
+                        <input type="text" class="form-control" id="nombre" placeholder="Ingrese el nombre" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion">Descripción</label>
+                        <input type="text" class="form-control" id="descripcion" placeholder="Ingrese la descripción" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="orden">Orden</label>
+                        <input type="number" class="form-control" id="orden" placeholder="Ingrese el orden" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="idTipoProyecto">ID Tipo Proyecto</label>
+                        <input type="number" class="form-control" id="idTipoProyecto" placeholder="Ingrese el ID del tipo de proyecto" required />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" id="btnSave" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        loadPromptTemplates();
+        $('#btnAdd').click(function () {
+            $('#promptTemplateModalLabel').text('Agregar Plantilla de Prompt');
+            $('#promptTemplateForm')[0].reset();
+            $('#promptTemplateId').val('');
+            $('#promptTemplateModal').modal('show');
+
+        });
+        $('#btnSave').click(function () {
+            const id = $('#promptTemplateId').val();
+            const nombre = $('#nombre').val();
+            const descripcion = $('#descripcion').val();
+            const orden = $('#orden').val();
+            const idTipoProyecto = $('#idTipoProyecto').val();
+            const url = id ? `/api/prompttemplate/update` : `/api/prompttemplate/create`;
+            const method = id ? 'PUT' : 'POST';
+            $.ajax({
+                url: url,
+                type: method,
+                contentType: 'application/json',
+                data: JSON.stringify({ id: id, nombre: nombre, descripcion: descripcion, orden: orden, idTipoProyecto: idTipoProyecto }),
+                success: function (result) {
+                    $('#promptTemplateModal').modal('hide');
+                    loadPromptTemplates();
+                },
+                error: function (err) {
+                    console.error(err);
+                }
+            });
+        });
+    }); 
+    
+    function loadPromptTemplates() {
+        const tipoProyecto = getParam('idTipoProyecto');
+        $.ajax({
+            url: `/api/prompttemplate/all/tipoproyecto/${tipoProyecto}`, // Cambia el ID según sea necesario
+            type: 'GET',
+            success: function (data) {
+                const tableBody = $('#promptTemplateTable tbody');
+                tableBody.empty();
+                data.forEach(function (promptTemplate) {
+                    tableBody.append(
+                        `
+                        <tr>
+                            <td>${promptTemplate.id}</td>
+                            <td>${promptTemplate.nombre}</td>
+                            <td>${promptTemplate.descripcion}</td>
+                            <td>
+
+                                <button class="btn btn-warning btnEdit" data-id="${promptTemplate.id}">Editar</button>
+
+                                <button class="btn btn-danger btnDelete" data-id="${promptTemplate.id}">Eliminar</button>
+                            </td>
+                        </tr>
+                    `
+                   );
+                });
+
+                $('.btnEdit').click(function () {
+                    const id = $(this).data('id');
+                    editPromptTemplate(id);
+                });
+
+                $('.btnDelete').click(function () {
+                    const id = $(this).data('id');
+                    deletePromptTemplate(id);
+                });
+            }
+        });
+    } function editPromptTemplate(id) {
+        $.ajax({
+            url: `/api/prompttemplate/${id}`,
+            type: 'GET',
+            success: function (data) {
+                $('#promptTemplateModalLabel').text('Editar Plantilla de Prompt');
+                $('#promptTemplateId').val(data.id);
+                $('#nombre').val(data.nombre);
+                $('#descripcion').val(data.descripcion);
+                $('#orden').val(data.orden);
+                $('#idTipoProyecto').val(data.idTipoProyecto);
+                $('#promptTemplateModal').modal('show');
+
+            }
+        });
+    } function deletePromptTemplate(id) {
+        if (confirm('¿Está seguro de que desea eliminar esta plantilla de prompt?')) {
+            $.ajax({
+                url: `/api/prompttemplate/delete/${id}`,
+                type: 'DELETE',
+                success: function () {
+                    loadPromptTemplates();
+                },
+                error: function (err) {
+                    console.error(err);
+                }
+            });
+        }
+    }</script>

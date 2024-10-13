@@ -45,11 +45,11 @@ namespace FolderView.Dapper.Repositorios
             return resultado;
         }
 
-        public async Task<List<PromptTemplateEntidad>> GetAllByIdTipoProyectoAsync(int id)
+        public async Task<List<PromptTemplateEntidad>> GetAllByIdTipoProyectoAsync(int idTipoProyecto)
         {
             var query = "consolaMonitoreo..[CodeGenerator_PromptTemplate_GetAllByTipoProyecto]";
             var connection = _context.CreateConnection();
-            var resultado = await connection.QueryAsync<PromptTemplateEntidad>(query, new { id }, commandType: CommandType.StoredProcedure);
+            var resultado = await connection.QueryAsync<PromptTemplateEntidad>(query, new { idTipoProyecto }, commandType: CommandType.StoredProcedure);
             return resultado.ToList();
         }
     }

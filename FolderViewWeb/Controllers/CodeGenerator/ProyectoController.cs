@@ -9,10 +9,15 @@ namespace FolderView.Controllers
     public class ProyectoController : Controller
     {
         private readonly IProyectoRepository _proyectoRepositorio;
+        private readonly ITipoProyectoRepository _tipoProyectoRepository;
 
-        public ProyectoController(IProyectoRepository proyectoRepositorio)
+        public ProyectoController(
+            IProyectoRepository proyectoRepositorio,
+            ITipoProyectoRepository tipoProyectoRepository
+        )
         {
             _proyectoRepositorio = proyectoRepositorio;
+            _tipoProyectoRepository = tipoProyectoRepository;
         }
 
         public IActionResult Index()
@@ -20,41 +25,44 @@ namespace FolderView.Controllers
             return View();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create(ProyectoEntidad dto)
-        {
-            var result = await _proyectoRepositorio.CreateAsync(dto);
-            return Json(result);
-        }
-
-        [HttpGet("{id}")]
+        [HttpGet("api/proyecto/{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _proyectoRepositorio.GetByIdAsync(id);
             return Json(result);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Update(ProyectoEntidad dto)
+        [HttpGet("api/proyecto/all/tipoproyecto/{id}")]
+        public async Task<IActionResult> GetAllByIdTipoProyecto(int id)
+        {
+            var result = await _proyectoRepositorio.GetAllByIdTipoProyectoAsync(id);
+            foreach (var proyecto in result)
+            {
+                proyecto.TipoProyecto = await _tipoProyectoRepository.GetByIdAsync(proyecto.idTipoProyecto);
+            }
+            return Json(result);
+        }
+
+        [HttpPost("api/proyecto/create")]
+        public async Task<IActionResult> Create([FromBody] ProyectoEntidad dto)
+        {
+            var result = await _proyectoRepositorio.CreateAsync(dto);
+            return Json(result);
+        }
+
+        [HttpPut("api/proyecto/update")]
+        public async Task<IActionResult> Update([FromBody] ProyectoEntidad dto)
         {
             var result = await _proyectoRepositorio.UpdateAsync(dto);
             return Json(result);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("api/proyecto/delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _proyectoRepositorio.DeleteAsync(id);
             return Json(result);
         }
-
-        [HttpGet("GetAllByIdTipoProyecto/{id}")]
-        public async Task<IActionResult> GetAllByIdTipoProyecto(int id)
-        {
-            var result = await _proyectoRepositorio.GetAllByIdTipoProyectoAsync(id);
-            return Json(result);
-        }
-
-       
     }
+
 }

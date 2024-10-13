@@ -1,0 +1,252 @@
+﻿@{
+    ViewData["Title"] = "Proyecto";
+}
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+            Tipo proyecto: 
+            <small id="title-project"></small>
+        </h1>
+        <p id="description-project"></p>
+    </section>
+
+    <section class="content">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Lista de Proyectos</h3>
+                <button id="btnAdd" class="btn btn-primary pull-right">
+                    <i class="fa fa-plus"></i>
+                    Agregar Proyecto
+                </button>
+                <a href="@Url.Action("Index", "TipoProyecto")/Index" class="btn btn-info pull-right">
+                    <i class="fa fa-arrow-left"></i>
+                    Administrar los tipo proyectos
+                </a>
+            </div>
+            <div class="box-body">
+                <table id="proyectoTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre Proyecto</th>
+                            <th>Tipo Proyecto</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+<!-- Modal para agregar/editar Proyecto -->
+<div class="modal fade" id="proyectoModal" tabindex="-1" role="dialog" aria-labelledby="proyectoModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="proyectoModalLabel">Agregar Proyecto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            @*<div class="modal-body">
+                <form id="proyectoForm">
+                    <input type="hidden" id="proyectoId" />
+                    <div class="form-group">
+                        <label for="nombreProyecto">Nombre Proyecto</label>
+                        <input type="text" class="form-control" id="nombreProyecto" placeholder="Ingrese el nombre del proyecto" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="idTipoProyecto">Tipo Proyecto</label>
+                        <input type="number" class="form-control" id="idTipoProyecto" placeholder="Ingrese el ID del tipo de proyecto" required />
+                    </div>
+                </form>
+            </div>*@
+            <div class="modal-body">
+                <form id="proyectoForm">
+                    <input type="hidden" id="proyectoId" />
+                    <div class="form-group">
+                        <label for="nombreProyecto">Nombre Proyecto</label>
+                        <input type="text" class="form-control" id="nombreProyecto" placeholder="Ingrese el nombre del proyecto" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="idTipoProyecto">Tipo Proyecto</label>
+                        <select class="form-control" id="idTipoProyecto" required>
+                            <option value="">Seleccione un tipo de proyecto</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                <button type="button" id="btnSave" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        loadProyectos();
+        loadTipoProyectos(); // Cargar los tipos de proyecto al cargar la página
+
+        $('#btnAdd').click(function () {
+            $('#proyectoModalLabel').text('Agregar Proyecto');
+            $('#proyectoForm')[0].reset();
+            $('#proyectoId').val('');
+            $('#proyectoModal').modal('show');
+        });
+
+        $('#btnSave').click(function () {
+            const id = $('#proyectoId').val() ? parseInt($('#proyectoId').val()) : 0;
+            const nombreProyecto = $('#nombreProyecto').val();
+            const idTipoProyecto = parseInt($('#idTipoProyecto').val());
+            const url = id != 0 ? `/api/proyecto/update` : `/api/proyecto/create`;
+            const method = id ? 'PUT' : 'POST';
+
+            console.log(id, nombreProyecto, idTipoProyecto);
+
+            $.ajax({
+                url: url,
+                type: method,
+                contentType: 'application/json',
+                data: JSON.stringify({ id: id, nombreProyecto: nombreProyecto, idTipoProyecto: idTipoProyecto }),
+                success: function (result) {
+                    $('#proyectoModal').modal('hide');
+                    loadProyectos();
+                },
+                error: function (err) {
+                    console.error(err);
+                }
+            });
+        });
+
+
+        //$('#btnSave').click(function () {
+        //    const id = $('#proyectoId').val();
+        //    const nombreProyecto = $('#nombreProyecto').val();
+        //    const idTipoProyecto = $('#idTipoProyecto').val();
+        //    const url = id ? `/api/proyecto/update` : `/api/proyecto/create`;
+        //    const method = id ? 'PUT' : 'POST';
+
+        //    console.log(nombreProyecto, idTipoProyecto)
+
+        //    $.ajax({
+        //        url: url,
+        //        type: method,
+        //        contentType: 'application/json',
+        //        data: JSON.stringify({ id: id, nombreProyecto: nombreProyecto, idTipoProyecto: idTipoProyecto }),
+        //        success: function (result) {
+        //            $('#proyectoModal').modal('hide');
+        //            loadProyectos();
+        //        },
+        //        error: function (err) {
+        //            console.error(err);
+        //        }
+        //    });
+        //});
+    });
+
+    function loadProyectos() {
+        const idTipoProyecto = getParam('idTipoProyecto');
+
+        $.ajax({
+            url: `/api/TipoProyecto/${idTipoProyecto}`,
+            type: 'GET',
+            success: function (data) {
+                console.log(data)
+                const title = $('#title-project')
+                title.text(data.nombre);
+
+                const description = $('#description-project')
+                description.text(data.descripcion);
+            }
+        });
+
+        $.ajax({
+            url: `/api/proyecto/all/tipoproyecto/${idTipoProyecto}`, // Cambiar 1 por el tipo de proyecto correspondiente
+            type: 'GET',
+            success: function (data) {
+                const title = $('#title-proyect')
+                title.text(data.nombre);
+
+                const tableBody = $('#proyectoTable tbody');
+                tableBody.empty();
+                data.forEach(function (proyecto) {
+                    tableBody.append(`
+                            <tr>
+                                <td>${proyecto.id}</td>
+                                <td>${proyecto.nombreProyecto}</td>
+                                <td>${proyecto.tipoProyecto.nombre}</td>
+                                <td>
+                                    <a href="@Url.Action("Index", "CodeGeneratorViewer")/Index?idProyecto=${proyecto.id}" class="btn btn-info btnEdit" data-id="${proyecto.id}">
+                                            <i class="fa fa-code"></i> Generar Codigo
+                                    </a>
+                                    <button class="btn btn-warning btnEdit" data-id="${proyecto.id}">
+                                             <i class="fa fa-pencil"></i>Editar
+                                    </button>
+                                    <button class="btn btn-danger btnDelete" data-id="${proyecto.id}">
+                                            <i class="fa fa-trash"></i>Editar
+                                        Eliminar
+                                    </button>
+                                </td>
+                            </tr>
+                        `);
+                });
+                $('.btnEdit').click(function () {
+                    const id = $(this).data('id');
+                    editProyecto(id);
+                });
+                $('.btnDelete').click(function () {
+                    const id = $(this).data('id');
+                    deleteProyecto(id);
+                });
+            }
+        });
+    }
+
+    function editProyecto(id) {
+        $.ajax({
+            url: `/api/proyecto/${id}`,
+            type: 'GET',
+            success: function (data) {
+                $('#proyectoModalLabel').text('Editar Proyecto');
+                $('#proyectoId').val(data.id);
+                $('#nombreProyecto').val(data.nombreProyecto);
+                $('#idTipoProyecto').val(data.idTipoProyecto);
+                $('#proyectoModal').modal('show');
+            }
+        });
+    }
+
+    function deleteProyecto(id) {
+        if (confirm('¿Está seguro de que desea eliminar este proyecto?')) {
+            $.ajax({
+                url: `/api/proyecto/delete/${id}`,
+                type: 'DELETE',
+                success: function () {
+                    loadProyectos();
+                },
+                error: function (err) {
+                    console.error(err);
+                }
+            });
+        }
+    }
+
+    function loadTipoProyectos() {
+        $.ajax({
+            url: '/api/tipoproyecto/all',
+            type: 'GET',
+            success: function (data) {
+                const selectTipoProyecto = $('#idTipoProyecto');
+                selectTipoProyecto.empty();
+                selectTipoProyecto.append('<option value="">Seleccione un tipo de proyecto</option>');
+                data.forEach(function (tipoProyecto) {
+                    selectTipoProyecto.append(`<option value="${tipoProyecto.id}">${tipoProyecto.nombre}</option>`);
+                });
+            }
+        });
+    }
+</script>

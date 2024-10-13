@@ -1,0 +1,226 @@
+﻿@model FolderView.Dapper.Entidades.ProyectoEntidad
+
+<!-- Incluir highlight.js desde un CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+<!-- and it's easy to individually load additional languages -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+
+<script>hljs.highlightAll();</script>
+
+
+<style>
+    .sidebar-menu__custom {
+        width: 250px;
+        background-color: #222d32;
+        height: 100%;
+        list-style: none;
+        padding: 0;
+    }
+
+        .sidebar-menu__custom > .item-header {
+            color: #4b646f;
+            background: #1a2226;
+            padding: 10px 25px 10px 15px;
+            font-size: 12px;
+        }
+
+    ul > li > a {
+        padding: 12px 15px 12px 15px;
+        display: block;
+        color: #fff;
+    }
+
+    .treeview-menu > li > a {
+        padding: 10px 15px 10px 25px;
+        display: block;
+        color: #fff;
+    }
+</style>
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper" style="display:grid; grid-template-columns: 1fr; height: 100%">
+
+
+    <!-- Main content -->
+    <section class="" style="margin: 20px">
+
+        <!--------------------------
+        | Your Page Content Here |
+        -------------------------->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">Nombre proyecto: @Model.nombreProyecto</h3>
+            </div>
+            <div class="box-body">
+                <h4><strong>Tipo de Proyecto:</strong> @Model.TipoProyecto.nombre</h4>
+                <p>@Model.TipoProyecto.descripcion</p>
+            </div>
+        </div>
+
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">Tipo de archivos a crear</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <ul class="list-group">
+                    @{ var contador = 1; }
+                    @foreach (var promptTemplate in Model.TipoProyecto.promptTemplates)
+                    {
+                        <li class="list-group-item">
+                            <i class="fa fa-check text-success"></i> <strong>@contador.- @promptTemplate.Nombre: </strong>@promptTemplate.descripcion
+                        </li>
+
+                        contador++;
+                    }
+                   
+                    <!-- Agrega más elementos según sea necesario -->
+                </ul>
+            </div>
+            <!-- /.box-body -->
+        </div>
+
+        @foreach (var promptTemplate in Model.TipoProyecto.promptTemplates)
+        {
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title">@promptTemplate.Nombre</h3>
+                    <p>@promptTemplate.descripcion</p>
+                </div>
+                <!-- /.box-header -->
+                <!-- form start -->
+                @{ var idFormulario = $"formulario{promptTemplate.Id}";}
+                <form id="@idFormulario">
+                        <div class="box-body">
+                            @foreach (var parametrosPrompTemplate in promptTemplate.ParametrosPromptTemplate.Where(x => x.IdPromptTemplateEntrada == 0))
+                            {
+                                <div class="form-group">
+                                    <label for="inputText"> @parametrosPrompTemplate.label </label>
+                                    <textarea class="form-control" id="@parametrosPrompTemplate.nombre_parametro@promptTemplate.Id" placeholder="@parametrosPrompTemplate.placeholder" rows="4"></textarea>
+                                </div>    
+                            }
+                        
+                        </div>
+                        <!-- /.box-body -->
+                        @{ var idBtnSave = $"btnSave{promptTemplate.Id}"; }
+                        <div class="box-footer">
+                            <button id="@idBtnSave" type="submit" class="btn btn-primary">Generar codigo</button>
+                        </div>
+                </form>
+            
+                @*<script>
+                    $('@idBtnSave').click(function () {
+
+                        const nombre = $('#nombre').val();
+                        const descripcion = $('#descripcion').val();
+                        const urlImagen = $('#urlImagen').val();
+
+                        if (!nombre || nombre.length < 3) {
+                            $('#nombre').addClass('is-invalid');
+                            return;
+                        } else {
+                            $('#nombre').removeClass('is-invalid');
+                        }
+
+                        if (!descripcion) {
+                            $('#descripcion').addClass('is-invalid');
+                            return;
+                        } else {
+                            $('#descripcion').removeClass('is-invalid');
+                        }
+
+                        const id = $('#tipoProyectoId').val();
+                        const url = id ? `/api/tipoproyecto/update` : `/api/tipoproyecto/create`;
+                        const method = id ? 'PUT' : 'POST';
+
+                        $.ajax({
+                            url: url,
+                            type: method,
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                id: id || 0,
+                                nombre: nombre,
+                                descripcion: descripcion,
+                                urlImagen: urlImagen || ""
+                            }),
+                            success: function (result) {
+                                $('#tipoProyectoModal').modal('hide');
+                                loadTipoProyectos();
+                            },
+                            error: function (err) {
+                                console.error(err);
+                            }
+                        });
+                    });
+
+                </script>*@
+            </div>
+
+
+        }
+
+        <div class="row">
+            @*@foreach (var file in Model)
+            {
+
+                <h1>@file.path</h1>
+
+                <div class="col-xs-12" style="margin-top: 30px;">
+                    <button class="copy-button" onclick="copyCode(this)">Copiar</button>
+                    <button class="download-button" onclick="downloadCode(this, 'codigo.py')">Descargar</button>
+
+                    <h3>Documentacion</h3>
+                    <pre>
+                    <code class="language-python">
+                            @file.documentation
+                            </code>
+                        </pre>
+
+                    <h3>Codigo</h3>
+
+                    <pre>
+                    <code class="language-python">
+                            @file.code
+                            </code>
+                        </pre>
+                </div>
+            }*@
+
+
+
+        </div>
+
+    </section>
+    <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+
+
+<script>
+
+    $(document).ready(function() {
+        $('#formularioInicial').on('submit', function (event) {
+        event.preventDefault(); // Evita que el formulario se envíe de manera tradicional
+
+        let inputText = $('#inputText').val();
+
+        $.ajax({
+            url: '/api/mi-endpoint', // Reemplaza con tu endpoint
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ texto: inputText }),
+            success: function(response) {
+                // Mostrar la respuesta JSON en el div
+                $('#jsonResponse').html('<strong>Respuesta:</strong> ' + JSON.stringify(response)).fadeIn();
+            },
+            error: function(xhr, status, error) {
+                // Manejo de errores
+                $('#jsonResponse').html('<strong>Error:</strong> ' + error).fadeIn();
+            }
+        });
+    });
+});
+
+</script>

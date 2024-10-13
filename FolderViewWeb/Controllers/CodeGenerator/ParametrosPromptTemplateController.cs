@@ -20,39 +20,40 @@ namespace FolderView.Controllers
             return View();
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create(ParametrosPromptTemplateEntidad dto)
-        {
-            var result = await _parametrosPromptTemplateRepositorio.CreateAsync(dto);
-            return Json(result);
-        }
-
-        [HttpGet("{id}")]
+        [HttpGet("api/parametrosprompttemplate/{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _parametrosPromptTemplateRepositorio.GetByIdAsync(id);
             return Json(result);
         }
 
-        [HttpPut]
+        [HttpGet("api/parametrosprompttemplate/all/prompttemplate/{id}")]
+        public async Task<IActionResult> GetAllByIdPromptTemplate(int id)
+        {
+            var result = await _parametrosPromptTemplateRepositorio.GetAllByIdPromptTemplateAsync(id);
+            return Json(result);
+        }
+
+        [HttpPost("api/parametrosprompttemplate/create")]
+        public async Task<IActionResult> Create(ParametrosPromptTemplateEntidad dto)
+        {
+            var result = await _parametrosPromptTemplateRepositorio.CreateAsync(dto);
+            return Json(result);
+        }
+
+        [HttpPut("api/parametrosprompttemplate/update")]
         public async Task<IActionResult> Update(ParametrosPromptTemplateEntidad dto)
         {
             var result = await _parametrosPromptTemplateRepositorio.UpdateAsync(dto);
             return Json(result);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("api/parametrosprompttemplate/delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _parametrosPromptTemplateRepositorio.DeleteAsync(id);
             return Json(result);
         }
-
-        [HttpGet("GetAllByIdPromptTemplate/{id}")]
-        public async Task<IActionResult> GetAllByIdPromptTemplate(int id)
-        {
-            var result = await _parametrosPromptTemplateRepositorio.GetAllByIdPromptTemplateAsync(id);
-            return Json(result);
-        }
     }
+
 }
