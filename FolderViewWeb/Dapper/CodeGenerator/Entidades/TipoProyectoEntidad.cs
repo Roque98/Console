@@ -8,6 +8,6 @@
         public DateTime? fechaCreacion { get; set; }
         public DateTime? fechaModificacion { get; set; }
         public string urlImagen { get; set; }
-        public List<PromptTemplateEntidad> promptTemplates  = new List<PromptTemplateEntidad>();
+        public List<PromptTemplateEntidad> promptTemplates { get; set; }
     }
 }

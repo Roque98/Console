@@ -10,6 +10,7 @@ namespace FolderView.Dapper.Interfaces
         Task<CodeGeneratorArchivoEntidad> DeleteAsync(int id);
 
         Task<List<CodeGeneratorArchivoEntidad>> GetAllByIdProyectoAsync(int id);
+        Task<List<CodeGeneratorArchivoEntidad>> GetAllByIdPrompTemplateAsync(int idPromptTemplate, int idProyecto);
         Task<List<CodeGeneratorArchivoEntidad>> GetAllByIdArchivoPadreAsync(int id);
     }
 }

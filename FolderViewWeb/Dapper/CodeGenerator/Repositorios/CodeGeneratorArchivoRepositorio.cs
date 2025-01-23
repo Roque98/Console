@@ -62,6 +62,22 @@ namespace FolderView.Dapper.Repositorios
             return result; 
         }
 
+        public async Task<List<CodeGeneratorArchivoEntidad>> GetAllByIdPrompTemplateAsync(int idPromptTemplate, int idProyecto)
+        {
+            var query = "consolaMonitoreo..[CodeGenerator_Archivo_GetAllByIdPromptTemplate]";
+            var connection = _context.CreateConnection();
+            var resultado = await connection.QueryAsync<CodeGeneratorArchivoEntidad>(query, new { idPromptTemplate, idProyecto }, commandType: CommandType.StoredProcedure);
+            var result = resultado.ToList();
+
+            // Escapar codigo html
+            foreach (var archivo in result.Where(x => x.Extension.Contains("html")))
+            {
+                archivo.Contenido = CodeGeneratorUtil.EscapeHtml(archivo.Contenido);
+            }
+
+            return result;
+        }
+
         public async Task<List<CodeGeneratorArchivoEntidad>> GetAllByIdArchivoPadreAsync(int id)
         {
             var query = "consolaMonitoreo..[CodeGenerator_Archivo_GetAll]";
