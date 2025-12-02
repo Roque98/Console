@@ -156,7 +156,7 @@
         function cargarTabla() {
             const fechaInicio = $('#fechaInicio').val();
             const fechaFin = $('#fechaFin').val();
-            const url = `/api/mis-operaciones?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+            const url = '/api/mis-operaciones?fechaInicio=' + fechaInicio + '&fechaFin=' + fechaFin;
 
             if (table) {
                 table.destroy();
@@ -199,9 +199,9 @@
                     {
                         data: null,
                         render: function(data) {
-                            return `<button class="btn btn-xs btn-info btnVerDetalle" data-id="${data.idLog}">
-                                <i class="fa fa-search"></i> Ver
-                            </button>`;
+                            return '<button class="btn btn-xs btn-info btnVerDetalle" data-id="' + data.idLog + '">' +
+                                '<i class="fa fa-search"></i> Ver' +
+                            '</button>';
                         }
                     }
                 ],
@@ -242,31 +242,31 @@
             $('#detalleContent').html('<p class="text-center"><i class="fa fa-spinner fa-spin"></i> Cargando...</p>');
             $('#modalDetalle').modal('show');
 
-            $.get(`/api/mis-operaciones/${id}`, function(data) {
+            $.get('/api/mis-operaciones/' + id, function(data) {
                 let html = '<dl class="dl-horizontal">';
-                html += `<dt>ID Log:</dt><dd>${data.idLog}</dd>`;
-                html += `<dt>Comando:</dt><dd><strong>${data.operacion}</strong></dd>`;
-                html += `<dt>Módulo:</dt><dd>${data.modulo}</dd>`;
-                html += `<dt>Comando:</dt><dd><code>${data.comando || '-'}</code></dd>`;
-                html += `<dt>Fecha/Hora:</dt><dd>${new Date(data.fechaHora).toLocaleString('es-ES')}</dd>`;
-                html += `<dt>Resultado:</dt><dd>${data.exito
+                html += '<dt>ID Log:</dt><dd>' + data.idLog + '</dd>';
+                html += '<dt>Comando:</dt><dd><strong>' + data.operacion + '</strong></dd>';
+                html += '<dt>Módulo:</dt><dd>' + data.modulo + '</dd>';
+                html += '<dt>Comando:</dt><dd><code>' + (data.comando || '-') + '</code></dd>';
+                html += '<dt>Fecha/Hora:</dt><dd>' + new Date(data.fechaHora).toLocaleString('es-ES') + '</dd>';
+                html += '<dt>Resultado:</dt><dd>' + (data.exito
                     ? '<span class="label label-success">Éxito</span>'
-                    : '<span class="label label-danger">Error</span>'}</dd>`;
-                html += `<dt>Tiempo Ejecución:</dt><dd>${data.tiempoEjecucion || 0} ms</dd>`;
-                html += `<dt>Usuario:</dt><dd>${data.usuario}</dd>`;
-                html += `<dt>Cuenta Telegram:</dt><dd>${data.telegramUsername ? '@@' + data.telegramUsername : '-'}</dd>`;
-                html += `<dt>IP:</dt><dd>${data.ipAddress || '-'}</dd>`;
+                    : '<span class="label label-danger">Error</span>') + '</dd>';
+                html += '<dt>Tiempo Ejecución:</dt><dd>' + (data.tiempoEjecucion || 0) + ' ms</dd>';
+                html += '<dt>Usuario:</dt><dd>' + data.usuario + '</dd>';
+                html += '<dt>Cuenta Telegram:</dt><dd>' + (data.telegramUsername ? '@@' + data.telegramUsername : '-') + '</dd>';
+                html += '<dt>IP:</dt><dd>' + (data.ipAddress || '-') + '</dd>';
 
                 if (data.parametros) {
-                    html += `<dt>Parámetros:</dt><dd><pre>${data.parametros}</pre></dd>`;
+                    html += '<dt>Parámetros:</dt><dd><pre>' + data.parametros + '</pre></dd>';
                 }
 
                 if (data.resultado) {
-                    html += `<dt>Resultado:</dt><dd><pre>${data.resultado}</pre></dd>`;
+                    html += '<dt>Resultado:</dt><dd><pre>' + data.resultado + '</pre></dd>';
                 }
 
                 if (data.errorDetalle) {
-                    html += `<dt>Error:</dt><dd><pre class="text-danger">${data.errorDetalle}</pre></dd>`;
+                    html += '<dt>Error:</dt><dd><pre class="text-danger">' + data.errorDetalle + '</pre></dd>';
                 }
 
                 html += '</dl>';
