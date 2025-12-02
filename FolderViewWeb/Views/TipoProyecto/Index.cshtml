@@ -130,8 +130,23 @@
                                     <div class="dates">
                                         <p>Fecha de Creación: ${new Date(tipoProyecto.fechaCreacion).toLocaleDateString()}</p>
                                         <p>Fecha de Modificación: ${new Date(tipoProyecto.fechaModificacion).toLocaleDateString()}</p>
-                                        <button class="btn btn-warning btnEdit" data-id="${tipoProyecto.id}">Editar</button>
-                                        <button class="btn btn-danger btnDelete" data-id="${tipoProyecto.id}">Eliminar</button>
+
+                                            <a href="@Url.Action("Index", "Proyecto")/Index?idTipoProyecto=${tipoProyecto.id}" class="btn btn-info btnEdit" data-id="${tipoProyecto.id}">
+                                            <i class="fa fa-folder-open"></i> PROYECTOS
+                                        </a>
+
+                                        <button class="btn btn-warning btnEdit" data-id="${tipoProyecto.id}">
+                                            <i class="fa fa-pencil"></i> Editar
+                                        </button>
+
+                                        <button class="btn btn-danger btnDelete" data-id="${tipoProyecto.id}">
+                                            <i class="fa fa-trash"></i> Eliminar
+                                        </button>
+
+                                             <a class="btn btn-info" href="@Url.Action("Index", "PromptTemplate")/Index?idTipoProyecto=${tipoProyecto.id}">
+                                                <i class="fa fa-code-fork"></i> Prompt templates
+                                        </a>
+
                                     </div>
                                 </div>
                             </div>
