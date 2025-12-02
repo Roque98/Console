@@ -1,0 +1,150 @@
+@{
+    ViewData["Title"] = "Roles IA - Administración Bot";
+}
+
+<link rel="stylesheet" href="~/adminLTE/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>Gestión de Roles IA</h1>
+    </section>
+
+    <section class="content">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Lista de Roles IA</h3>
+                <button type="button" class="btn btn-primary pull-right" id="btnNuevo">
+                    <i class="fa fa-plus"></i> Nuevo Rol IA
+                </button>
+            </div>
+            <div class="box-body">
+                <table id="rolesIATable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Usuarios</th>
+                            <th>Gerencias</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="rolIAModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Nuevo Rol IA</h4>
+            </div>
+            <div class="modal-body">
+                <form id="rolIAForm">
+                    <input type="hidden" id="idRol">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" class="form-control" id="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea class="form-control" id="descripcion" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select class="form-control" id="activo">
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardar">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        let table = $('#rolesIATable').DataTable({
+            ajax: {
+                url: '/api/roles-ia',
+                dataSrc: ''
+            },
+            columns: [
+                { data: 'idRol' },
+                { data: 'nombre' },
+                { data: 'descripcion' },
+                { data: 'totalUsuarios' },
+                { data: 'totalGerencias' },
+                {
+                    data: 'activo',
+                    render: function(data) {
+                        return data ? '<span class="label label-success">Activo</span>' : '<span class="label label-danger">Inactivo</span>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function(data) {
+                        return `
+                            <button class="btn btn-sm btn-warning btnEditar" data-id="${data.idRol}">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                        `;
+                    }
+                }
+            ],
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+            }
+        });
+
+        $('#btnNuevo').click(function() {
+            $('#rolIAForm')[0].reset();
+            $('#idRol').val('');
+            $('#rolIAModal').modal('show');
+        });
+
+        $(document).on('click', '.btnEditar', function() {
+            const id = $(this).data('id');
+            $.get(`/api/roles-ia/${id}`, function(data) {
+                $('#idRol').val(data.idRol);
+                $('#nombre').val(data.nombre);
+                $('#descripcion').val(data.descripcion);
+                $('#activo').val(data.activo.toString());
+                $('#rolIAModal').modal('show');
+            });
+        });
+
+        $('#btnGuardar').click(function() {
+            const id = $('#idRol').val();
+            const url = id ? `/api/roles-ia/${id}` : '/api/roles-ia';
+            const method = id ? 'PUT' : 'POST';
+
+            $.ajax({
+                url: url,
+                type: method,
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    idRol: id || 0,
+                    nombre: $('#nombre').val(),
+                    descripcion: $('#descripcion').val(),
+                    activo: $('#activo').val() === 'true'
+                }),
+                success: function() {
+                    $('#rolIAModal').modal('hide');
+                    table.ajax.reload();
+                }
+            });
+        });
+    });
+</script>

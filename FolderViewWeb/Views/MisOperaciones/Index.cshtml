@@ -1,0 +1,279 @@
+@{
+    ViewData["Title"] = "Mis Operaciones - Mi Cuenta";
+}
+
+<link rel="stylesheet" href="~/adminLTE/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+            Mis Operaciones
+            <small>Historial de operaciones ejecutadas</small>
+        </h1>
+    </section>
+
+    <section class="content">
+        <!-- Estadísticas -->
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box bg-aqua">
+                    <span class="info-box-icon"><i class="fa fa-list"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Operaciones</span>
+                        <span class="info-box-number" id="statTotal">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box bg-green">
+                    <span class="info-box-icon"><i class="fa fa-check"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Exitosas</span>
+                        <span class="info-box-number" id="statExitosas">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box bg-red">
+                    <span class="info-box-icon"><i class="fa fa-times"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Fallidas</span>
+                        <span class="info-box-number" id="statFallidas">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box bg-yellow">
+                    <span class="info-box-icon"><i class="fa fa-star"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Más Frecuente</span>
+                        <span class="info-box-number" id="statMasFrecuente" style="font-size: 14px;">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros y Tabla -->
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-history"></i> Historial de Operaciones</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-sm btn-primary" id="btnFiltrar">
+                        <i class="fa fa-filter"></i> Filtrar por Fecha
+                    </button>
+                </div>
+            </div>
+            <div class="box-body">
+                <!-- Panel de filtros (oculto por defecto) -->
+                <div id="panelFiltros" style="display: none; margin-bottom: 15px;" class="well well-sm">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>Fecha Inicio:</label>
+                            <input type="date" class="form-control" id="fechaInicio">
+                        </div>
+                        <div class="col-md-4">
+                            <label>Fecha Fin:</label>
+                            <input type="date" class="form-control" id="fechaFin">
+                        </div>
+                        <div class="col-md-4" style="padding-top: 25px;">
+                            <button class="btn btn-success" id="btnAplicarFiltro">
+                                <i class="fa fa-check"></i> Aplicar
+                            </button>
+                            <button class="btn btn-default" id="btnLimpiarFiltro">
+                                <i class="fa fa-eraser"></i> Limpiar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <table id="operacionesTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Fecha/Hora</th>
+                            <th>Operación</th>
+                            <th>Módulo</th>
+                            <th>Resultado</th>
+                            <th>Tiempo (ms)</th>
+                            <th>Cuenta Telegram</th>
+                            <th>Detalles</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal fade" id="modalDetalle" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"><i class="fa fa-info-circle"></i> Detalle de la Operación</h4>
+            </div>
+            <div class="modal-body" id="detalleContent">
+                <p class="text-center"><i class="fa fa-spinner fa-spin"></i> Cargando...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/adminLTE/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="~/adminLTE/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        let table;
+
+        // Inicializar fechas por defecto (último mes)
+        const hoy = new Date();
+        const haceMes = new Date();
+        haceMes.setMonth(haceMes.getMonth() - 1);
+
+        $('#fechaInicio').val(haceMes.toISOString().split('T')[0]);
+        $('#fechaFin').val(hoy.toISOString().split('T')[0]);
+
+        cargarEstadisticas();
+        cargarTabla();
+
+        function cargarEstadisticas() {
+            $.get('/api/mis-operaciones/estadisticas', function(data) {
+                $('#statTotal').text(data.totalOperaciones);
+                $('#statExitosas').text(data.exitosas);
+                $('#statFallidas').text(data.fallidas);
+                $('#statMasFrecuente').text(data.operacionMasFrecuente);
+            });
+        }
+
+        function cargarTabla() {
+            const fechaInicio = $('#fechaInicio').val();
+            const fechaFin = $('#fechaFin').val();
+            const url = `/api/mis-operaciones?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+
+            if (table) {
+                table.destroy();
+            }
+
+            table = $('#operacionesTable').DataTable({
+                ajax: {
+                    url: url,
+                    dataSrc: ''
+                },
+                columns: [
+                    {
+                        data: 'fechaHora',
+                        render: function(data) {
+                            return new Date(data).toLocaleString('es-ES');
+                        }
+                    },
+                    { data: 'operacion' },
+                    { data: 'modulo' },
+                    {
+                        data: 'exito',
+                        render: function(data) {
+                            return data
+                                ? '<span class="label label-success"><i class="fa fa-check"></i> Éxito</span>'
+                                : '<span class="label label-danger"><i class="fa fa-times"></i> Error</span>';
+                        }
+                    },
+                    {
+                        data: 'tiempoEjecucion',
+                        render: function(data) {
+                            return data ? data + ' ms' : '-';
+                        }
+                    },
+                    {
+                        data: 'telegramUsername',
+                        render: function(data) {
+                            return data ? '@@' + data : '-';
+                        }
+                    },
+                    {
+                        data: null,
+                        render: function(data) {
+                            return `<button class="btn btn-xs btn-info btnVerDetalle" data-id="${data.idLog}">
+                                <i class="fa fa-search"></i> Ver
+                            </button>`;
+                        }
+                    }
+                ],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                },
+                order: [[0, 'desc']]
+            });
+        }
+
+        // Toggle panel de filtros
+        $('#btnFiltrar').click(function() {
+            $('#panelFiltros').slideToggle();
+        });
+
+        // Aplicar filtro
+        $('#btnAplicarFiltro').click(function() {
+            cargarTabla();
+            cargarEstadisticas();
+        });
+
+        // Limpiar filtro
+        $('#btnLimpiarFiltro').click(function() {
+            const hoy = new Date();
+            const haceMes = new Date();
+            haceMes.setMonth(haceMes.getMonth() - 1);
+
+            $('#fechaInicio').val(haceMes.toISOString().split('T')[0]);
+            $('#fechaFin').val(hoy.toISOString().split('T')[0]);
+
+            cargarTabla();
+            cargarEstadisticas();
+        });
+
+        // Ver detalle
+        $(document).on('click', '.btnVerDetalle', function() {
+            const id = $(this).data('id');
+            $('#detalleContent').html('<p class="text-center"><i class="fa fa-spinner fa-spin"></i> Cargando...</p>');
+            $('#modalDetalle').modal('show');
+
+            $.get(`/api/mis-operaciones/${id}`, function(data) {
+                let html = '<dl class="dl-horizontal">';
+                html += `<dt>ID Log:</dt><dd>${data.idLog}</dd>`;
+                html += `<dt>Operación:</dt><dd><strong>${data.operacion}</strong></dd>`;
+                html += `<dt>Módulo:</dt><dd>${data.modulo}</dd>`;
+                html += `<dt>Comando:</dt><dd><code>${data.comando || '-'}</code></dd>`;
+                html += `<dt>Fecha/Hora:</dt><dd>${new Date(data.fechaHora).toLocaleString('es-ES')}</dd>`;
+                html += `<dt>Resultado:</dt><dd>${data.exito
+                    ? '<span class="label label-success">Éxito</span>'
+                    : '<span class="label label-danger">Error</span>'}</dd>`;
+                html += `<dt>Tiempo Ejecución:</dt><dd>${data.tiempoEjecucion || 0} ms</dd>`;
+                html += `<dt>Usuario:</dt><dd>${data.usuario}</dd>`;
+                html += `<dt>Cuenta Telegram:</dt><dd>${data.telegramUsername ? '@@' + data.telegramUsername : '-'}</dd>`;
+                html += `<dt>IP:</dt><dd>${data.ipAddress || '-'}</dd>`;
+
+                if (data.parametros) {
+                    html += `<dt>Parámetros:</dt><dd><pre>${data.parametros}</pre></dd>`;
+                }
+
+                if (data.resultado) {
+                    html += `<dt>Resultado:</dt><dd><pre>${data.resultado}</pre></dd>`;
+                }
+
+                if (data.errorDetalle) {
+                    html += `<dt>Error:</dt><dd><pre class="text-danger">${data.errorDetalle}</pre></dd>`;
+                }
+
+                html += '</dl>';
+                $('#detalleContent').html(html);
+            }).fail(function() {
+                $('#detalleContent').html('<p class="text-danger">Error al cargar los detalles.</p>');
+            });
+        });
+    });
+</script>

@@ -1,0 +1,171 @@
+@{
+    ViewData["Title"] = "Roles y Permisos - Administración Bot";
+}
+
+<link rel="stylesheet" href="~/adminLTE/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>Gestión de Roles y Permisos</h1>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Roles</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="list-group" id="rolesList"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="box box-success">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Permisos del Rol: <span id="roleName"></span></h3>
+                        <button type="button" class="btn btn-sm btn-success pull-right" id="btnGuardarPermisos">
+                            <i class="fa fa-save"></i> Guardar Cambios
+                        </button>
+                    </div>
+                    <div class="box-body">
+                        <div id="permisosContainer">
+                            <p class="text-muted">Seleccione un rol para ver sus permisos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    $(document).ready(function () {
+        let selectedRolId = null;
+        let cambiosPendientes = [];
+
+        cargarRoles();
+
+        function cargarRoles() {
+            $.get('/api/roles', function(roles) {
+                const list = $('#rolesList');
+                list.empty();
+                roles.forEach(function(rol) {
+                    list.append(`
+                        <a href="#" class="list-group-item role-item" data-id="${rol.idRol}">
+                            <h4 class="list-group-item-heading">${rol.nombre}</h4>
+                            <p class="list-group-item-text">
+                                <small>
+                                    <i class="fa fa-users"></i> ${rol.totalUsuarios} usuarios |
+                                    <i class="fa fa-check"></i> ${rol.permisosAsignados} permisos
+                                </small>
+                            </p>
+                        </a>
+                    `);
+                });
+            });
+        }
+
+        $(document).on('click', '.role-item', function(e) {
+            e.preventDefault();
+            selectedRolId = $(this).data('id');
+            $('.role-item').removeClass('active');
+            $(this).addClass('active');
+            cargarPermisos(selectedRolId);
+        });
+
+        function cargarPermisos(rolId) {
+            $.get(`/api/roles/${rolId}/permisos`, function(permisos) {
+                const rol = $('.role-item.active h4').text();
+                $('#roleName').text(rol);
+
+                const container = $('#permisosContainer');
+                container.empty();
+
+                // Agrupar por módulo
+                const modulos = {};
+                permisos.forEach(function(p) {
+                    if (!modulos[p.modulo]) {
+                        modulos[p.modulo] = [];
+                    }
+                    modulos[p.modulo].push(p);
+                });
+
+                // Renderizar por módulo
+                for (const [modulo, ops] of Object.entries(modulos)) {
+                    container.append(`
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title"><i class="fa ${ops[0].iconoModulo}"></i> ${modulo}</h4>
+                            </div>
+                            <div class="panel-body">
+                                <table class="table table-condensed">
+                                    <tbody>
+                                        ${ops.map(op => `
+                                            <tr>
+                                                <td style="width: 50%;">
+                                                    <strong>${op.nombreOperacion}</strong><br>
+                                                    <small>${op.descripcion}</small><br>
+                                                    <code>${op.comando}</code>
+                                                </td>
+                                                <td style="width: 20%;">
+                                                    <span class="label label-${op.nivelCriticidad === 'BAJO' ? 'success' :
+                                                        op.nivelCriticidad === 'MEDIO' ? 'warning' : 'danger'}">
+                                                        ${op.nivelCriticidad}
+                                                    </span>
+                                                </td>
+                                                <td style="width: 30%; text-align: center;">
+                                                    <input type="checkbox" class="permiso-checkbox"
+                                                        data-operacion="${op.idOperacion}"
+                                                        ${op.permitido ? 'checked' : ''}>
+                                                    <label>${op.permitido ? 'Permitido' : 'Denegado'}</label>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `);
+                }
+            });
+        }
+
+        $(document).on('change', '.permiso-checkbox', function() {
+            const idOperacion = $(this).data('operacion');
+            const permitido = $(this).is(':checked');
+            $(this).next('label').text(permitido ? 'Permitido' : 'Denegado');
+
+            // Guardar cambio
+            cambiosPendientes.push({idOperacion, permitido});
+        });
+
+        $('#btnGuardarPermisos').click(function() {
+            if (cambiosPendientes.length === 0) {
+                alert('No hay cambios pendientes');
+                return;
+            }
+
+            let saved = 0;
+            cambiosPendientes.forEach(function(cambio) {
+                $.ajax({
+                    url: `/api/roles/${selectedRolId}/permisos/${cambio.idOperacion}`,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        permitido: cambio.permitido,
+                        usuarioAsignacion: 1
+                    }),
+                    success: function() {
+                        saved++;
+                        if (saved === cambiosPendientes.length) {
+                            alert('Permisos guardados correctamente');
+                            cambiosPendientes = [];
+                        }
+                    }
+                });
+            });
+        });
+    });
+</script>

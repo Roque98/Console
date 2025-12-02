@@ -1,3 +1,90 @@
-.vs
+# Visual Studio 2015/2017/2019/2022
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+[Oo]utput/
+[Bb]uild/
+[Ll]og/
+
+# Visual Studio Code
+.vscode/
+
+# NuGet
+.nuget/
+packages/
+*.nupkg
+*.snupkg
+*.nuspec
+project.lock.json
+project.fragment.lock.json
+
+# Rider
+.idea/
+
+# Resharper
+*.DotSettings
+*.DotSettings.user
+
+# NCrunch
+_NCrunch_*
+*.ncrunchsolution
+*.ncrunchproj
+
+# StyleCop
+StyleCop.Cache
+*.sa
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# Others
+*.bak
+*.tmp
+*.log
+*.pdb
+*.opendb
+*.sdf
+*.cache
+*.dbmdl
+*.mdf
+*.ldf
+*.vssscc
+*.vspscc
+*.vsscc
+*.vsmdi
+*.webtest
+*.testrunconfig
+*.trx
+*.rdc
+*.exe.config
+*.dll.config
+*.config.user
+*.datasource
+*.licx
+*.docstates
+*.publish
+*.pubxml
+*.pubxml.user
+*.resharper
+*.resharper.user
+*.resharper.host
 FolderViewWeb/bin/
 FolderViewWeb/obj/
+folderViewConsole/bin/
+folderViewConsole/obj/
+ReportesCapacidad.rar
+IMPLEMENTACION_COMPLETA.md
+MODULO_ADMINISTRACION_BOT.md
+MODULO_ADMINISTRACION_BOT_README.md
+FolderView.sln.DotSettings.user

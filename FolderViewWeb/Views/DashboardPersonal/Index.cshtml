@@ -1,0 +1,317 @@
+@{
+    ViewData["Title"] = "Dashboard Personal - Mi Cuenta";
+}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+            Dashboard Personal
+            <small>Vista general de tu actividad</small>
+        </h1>
+    </section>
+
+    <section class="content">
+        <!-- Resumen Estadísticas -->
+        <div class="row">
+            <div class="col-lg-3 col-xs-6">
+                <div class="small-box bg-aqua">
+                    <div class="inner">
+                        <h3 id="statOperacionesMes">0</h3>
+                        <p>Operaciones (30 días)</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-list"></i>
+                    </div>
+                    <a href="@Url.Action("Index", "MisOperaciones")" class="small-box-footer">
+                        Ver todas <i class="fa fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-xs-6">
+                <div class="small-box bg-green">
+                    <div class="inner">
+                        <h3 id="statPorcentajeExito">0<sup style="font-size: 20px">%</sup></h3>
+                        <p>Tasa de Éxito</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-check-circle"></i>
+                    </div>
+                    <a href="#" class="small-box-footer">
+                        <span id="statExitosas">0</span> exitosas / <span id="statFallidas">0</span> fallidas
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-xs-6">
+                <div class="small-box bg-yellow">
+                    <div class="inner">
+                        <h3 id="statTotalPermisos">0</h3>
+                        <p>Permisos Asignados</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-shield"></i>
+                    </div>
+                    <a href="@Url.Action("Index", "MisPermisos")" class="small-box-footer">
+                        Ver permisos <i class="fa fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-xs-6">
+                <div class="small-box bg-red">
+                    <div class="inner">
+                        <h3 id="statCuentasTelegram">0</h3>
+                        <p>Cuentas Telegram</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa fa-telegram"></i>
+                    </div>
+                    <a href="@Url.Action("Index", "MisCuentasTelegram")" class="small-box-footer">
+                        Gestionar <i class="fa fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Gráfico de Actividad -->
+            <div class="col-md-8">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-bar-chart"></i> Actividad de los Últimos 30 Días</h3>
+                    </div>
+                    <div class="box-body">
+                        <canvas id="actividadChart" height="80"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Usuario Info -->
+            <div class="col-md-4">
+                <div class="box box-widget widget-user">
+                    <div class="widget-user-header bg-aqua-active">
+                        <h3 class="widget-user-username" id="widgetUsuario">Usuario</h3>
+                        <h5 class="widget-user-desc">Cuenta Personal</h5>
+                    </div>
+                    <div class="widget-user-image">
+                        <i class="fa fa-user-circle" style="font-size: 90px; color: white;"></i>
+                    </div>
+                    <div class="box-footer">
+                        <div class="row">
+                            <div class="col-sm-6 border-right">
+                                <div class="description-block">
+                                    <h5 class="description-header" id="widgetCuentasActivas">0</h5>
+                                    <span class="description-text">CUENTAS ACTIVAS</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="description-block">
+                                    <h5 class="description-header" id="widgetOperacionesTotal">0</h5>
+                                    <span class="description-text">OPERACIONES</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 10px;">
+                            <div class="col-sm-12">
+                                <a href="@Url.Action("Index", "MiPerfil")" class="btn btn-primary btn-block">
+                                    <i class="fa fa-user"></i> Ver Mi Perfil Completo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Operaciones Más Usadas -->
+            <div class="col-md-6">
+                <div class="box box-success">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-star"></i> Operaciones Más Usadas</h3>
+                    </div>
+                    <div class="box-body">
+                        <div id="operacionesMasUsadas">
+                            <p class="text-muted"><i class="fa fa-spinner fa-spin"></i> Cargando...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actividad Reciente -->
+            <div class="col-md-6">
+                <div class="box box-warning">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-history"></i> Actividad Reciente</h3>
+                    </div>
+                    <div class="box-body">
+                        <ul class="timeline" id="actividadReciente">
+                            <li><i class="fa fa-spinner fa-spin bg-gray"></i></li>
+                        </ul>
+                    </div>
+                    <div class="box-footer">
+                        <a href="@Url.Action("Index", "MisOperaciones")" class="btn btn-sm btn-warning">
+                            <i class="fa fa-list"></i> Ver Todo el Historial
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        cargarResumen();
+        cargarOperacionesPorDia();
+        cargarOperacionesMasUsadas();
+        cargarActividadReciente();
+
+        function cargarResumen() {
+            $.get('/api/dashboard-personal/resumen', function(data) {
+                $('#statOperacionesMes').text(data.operacionesUltimos30Dias);
+                $('#statExitosas').text(data.operacionesExitosas);
+                $('#statFallidas').text(data.operacionesFallidas);
+                $('#statPorcentajeExito').html(data.porcentajeExito + '<sup style="font-size: 20px">%</sup>');
+                $('#statTotalPermisos').text(data.totalPermisos);
+                $('#statCuentasTelegram').text(data.cuentasTelegram);
+
+                $('#widgetUsuario').text(data.usuario);
+                $('#widgetCuentasActivas').text(data.cuentasActivas);
+                $('#widgetOperacionesTotal').text(data.operacionesUltimos30Dias);
+            });
+        }
+
+        function cargarOperacionesPorDia() {
+            $.get('/api/dashboard-personal/operaciones-por-dia', function(data) {
+                const ctx = document.getElementById('actividadChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map(d => new Date(d.fecha).toLocaleDateString('es-ES', {
+                            day: '2-digit',
+                            month: 'short'
+                        })),
+                        datasets: [
+                            {
+                                label: 'Exitosas',
+                                data: data.map(d => d.exitosas),
+                                borderColor: 'rgb(0, 166, 90)',
+                                backgroundColor: 'rgba(0, 166, 90, 0.1)',
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Fallidas',
+                                data: data.map(d => d.fallidas),
+                                borderColor: 'rgb(221, 75, 57)',
+                                backgroundColor: 'rgba(221, 75, 57, 0.1)',
+                                tension: 0.3
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        }
+
+        function cargarOperacionesMasUsadas() {
+            $.get('/api/dashboard-personal/operaciones-mas-usadas', function(data) {
+                if (!data || data.length === 0) {
+                    $('#operacionesMasUsadas').html('<p class="text-muted">No hay operaciones registradas.</p>');
+                    return;
+                }
+
+                let html = '<table class="table table-condensed">';
+                data.forEach(function(op, index) {
+                    const porcentaje = op.total > 0 ? Math.round((op.exitosas / op.total) * 100) : 0;
+                    const color = porcentaje >= 80 ? 'success' : porcentaje >= 50 ? 'warning' : 'danger';
+
+                    html += `
+                        <tr>
+                            <td style="width: 5px;">
+                                <span class="badge bg-blue">${index + 1}</span>
+                            </td>
+                            <td>
+                                <strong>${op.operacion}</strong><br>
+                                <small class="text-muted">
+                                    ${op.total} usos |
+                                    <span class="text-green">${op.exitosas} OK</span> |
+                                    <span class="text-red">${op.fallidas} ERR</span>
+                                </small>
+                            </td>
+                            <td style="width: 100px;">
+                                <div class="progress progress-xs">
+                                    <div class="progress-bar progress-bar-${color}"
+                                         style="width: ${porcentaje}%"></div>
+                                </div>
+                                <small>${porcentaje}% éxito</small>
+                            </td>
+                        </tr>`;
+                });
+                html += '</table>';
+                $('#operacionesMasUsadas').html(html);
+            });
+        }
+
+        function cargarActividadReciente() {
+            $.get('/api/dashboard-personal/actividad-reciente', function(data) {
+                if (!data || data.length === 0) {
+                    $('#actividadReciente').html('<li><i class="fa fa-info-circle bg-gray"></i><div class="timeline-item"><span class="time"><i class="fa fa-clock-o"></i></span><h3 class="timeline-header">No hay actividad reciente</h3></div></li>');
+                    return;
+                }
+
+                let html = '';
+                data.forEach(function(item) {
+                    const icon = item.exito ? 'fa-check' : 'fa-times';
+                    const color = item.exito ? 'green' : 'red';
+                    const fecha = new Date(item.fechaHora);
+
+                    html += `
+                        <li>
+                            <i class="fa ${icon} bg-${color}"></i>
+                            <div class="timeline-item">
+                                <span class="time">
+                                    <i class="fa fa-clock-o"></i> ${fecha.toLocaleString('es-ES', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
+                                </span>
+                                <h3 class="timeline-header">${item.operacion}</h3>
+                                <div class="timeline-body">
+                                    <small>
+                                        ${item.exito ? '<span class="label label-success">Éxito</span>' : '<span class="label label-danger">Error</span>'}
+                                        ${item.tiempoEjecucion ? ` | ${item.tiempoEjecucion} ms` : ''}
+                                        ${item.telegramUsername ? ` | @@${item.telegramUsername}` : ''}
+                                    </small>
+                                </div>
+                            </div>
+                        </li>`;
+                });
+
+                html += '<li><i class="fa fa-clock-o bg-gray"></i></li>';
+                $('#actividadReciente').html(html);
+            });
+        }
+    });
+</script>

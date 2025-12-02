@@ -1,0 +1,260 @@
+@{
+    ViewData["Title"] = "Operaciones - Administración Bot";
+}
+
+<link rel="stylesheet" href="~/adminLTE/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>Gestión de Operaciones</h1>
+    </section>
+
+    <section class="content">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Lista de Operaciones</h3>
+                <button type="button" class="btn btn-primary pull-right" id="btnNuevo">
+                    <i class="fa fa-plus"></i> Nueva Operación
+                </button>
+            </div>
+            <div class="box-body">
+                <table id="operacionesTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Módulo</th>
+                            <th>Nombre</th>
+                            <th>Comando</th>
+                            <th>Criticidad</th>
+                            <th>Usos</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="operacionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" id="modalTitle">Nueva Operación</h4>
+            </div>
+            <div class="modal-body">
+                <form id="operacionForm">
+                    <input type="hidden" id="idOperacion">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Módulo *</label>
+                                <select class="form-control" id="idModulo" required></select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Nombre *</label>
+                                <input type="text" class="form-control" id="nombre" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción *</label>
+                        <textarea class="form-control" id="descripcion" rows="2" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Comando *</label>
+                                <input type="text" class="form-control" id="comando" placeholder="/comando" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Nivel de Criticidad</label>
+                                <select class="form-control" id="nivelCriticidad">
+                                    <option value="BAJO">Bajo</option>
+                                    <option value="MEDIO">Medio</option>
+                                    <option value="ALTO">Alto</option>
+                                    <option value="CRITICO">Crítico</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>¿Requiere Parámetros?</label>
+                                <select class="form-control" id="requiereParametros">
+                                    <option value="false">No</option>
+                                    <option value="true">Sí</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Orden</label>
+                                <input type="number" class="form-control" id="orden" value="1">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ejemplo de Parámetros</label>
+                        <input type="text" class="form-control" id="parametrosEjemplo" placeholder="/comando param1 param2">
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select class="form-control" id="activo">
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardar">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        cargarModulos();
+
+        let table = $('#operacionesTable').DataTable({
+            ajax: {
+                url: '/api/operaciones',
+                dataSrc: ''
+            },
+            columns: [
+                { data: 'idOperacion' },
+                {
+                    data: 'modulo',
+                    render: function(data, type, row) {
+                        return `<i class="fa ${row.iconoModulo}"></i> ${data}`;
+                    }
+                },
+                { data: 'nombre' },
+                {
+                    data: 'comando',
+                    render: function(data) {
+                        return `<code>${data}</code>`;
+                    }
+                },
+                {
+                    data: 'nivelCriticidad',
+                    render: function(data) {
+                        const colors = { BAJO: 'success', MEDIO: 'warning', ALTO: 'danger', CRITICO: 'danger' };
+                        return `<span class="label label-${colors[data]}">${data}</span>`;
+                    }
+                },
+                { data: 'totalUsos' },
+                {
+                    data: 'activo',
+                    render: function(data) {
+                        return data ? '<span class="label label-success">Activo</span>' : '<span class="label label-danger">Inactivo</span>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function(data) {
+                        return `
+                            <button class="btn btn-sm btn-warning btnEditar" data-id="${data.idOperacion}">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger btnEliminar" data-id="${data.idOperacion}">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        `;
+                    }
+                }
+            ],
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+            }
+        });
+
+        function cargarModulos() {
+            $.get('/api/modulos', function(modulos) {
+                const select = $('#idModulo');
+                select.empty();
+                modulos.forEach(function(m) {
+                    select.append(`<option value="${m.idModulo}">${m.nombre}</option>`);
+                });
+            });
+        }
+
+        $('#btnNuevo').click(function() {
+            $('#modalTitle').text('Nueva Operación');
+            $('#operacionForm')[0].reset();
+            $('#idOperacion').val('');
+            $('#operacionModal').modal('show');
+        });
+
+        $(document).on('click', '.btnEditar', function() {
+            const id = $(this).data('id');
+            $.get(`/api/operaciones/${id}`, function(data) {
+                $('#modalTitle').text('Editar Operación');
+                $('#idOperacion').val(data.idOperacion);
+                $('#idModulo').val(data.idModulo);
+                $('#nombre').val(data.nombre);
+                $('#descripcion').val(data.descripcion);
+                $('#comando').val(data.comando);
+                $('#nivelCriticidad').val(data.nivelCriticidad);
+                $('#requiereParametros').val(data.requiereParametros.toString());
+                $('#parametrosEjemplo').val(data.parametrosEjemplo);
+                $('#orden').val(data.orden);
+                $('#activo').val(data.activo.toString());
+                $('#operacionModal').modal('show');
+            });
+        });
+
+        $('#btnGuardar').click(function() {
+            const id = $('#idOperacion').val();
+            const url = id ? `/api/operaciones/${id}` : '/api/operaciones';
+            const method = id ? 'PUT' : 'POST';
+
+            $.ajax({
+                url: url,
+                type: method,
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    idOperacion: id || 0,
+                    idModulo: parseInt($('#idModulo').val()),
+                    nombre: $('#nombre').val(),
+                    descripcion: $('#descripcion').val(),
+                    comando: $('#comando').val(),
+                    nivelCriticidad: $('#nivelCriticidad').val(),
+                    requiereParametros: $('#requiereParametros').val() === 'true',
+                    parametrosEjemplo: $('#parametrosEjemplo').val(),
+                    orden: parseInt($('#orden').val()),
+                    activo: $('#activo').val() === 'true'
+                }),
+                success: function() {
+                    $('#operacionModal').modal('hide');
+                    table.ajax.reload();
+                }
+            });
+        });
+
+        $(document).on('click', '.btnEliminar', function() {
+            if (confirm('¿Está seguro de eliminar esta operación?')) {
+                const id = $(this).data('id');
+                $.ajax({
+                    url: `/api/operaciones/${id}`,
+                    type: 'DELETE',
+                    success: function() {
+                        table.ajax.reload();
+                    }
+                });
+            }
+        });
+    });
+</script>

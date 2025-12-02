@@ -1,0 +1,120 @@
+@{
+    ViewData["Title"] = "Logs - Administración Bot";
+}
+
+<link rel="stylesheet" href="~/adminLTE/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>Logs de Operaciones</h1>
+    </section>
+
+    <section class="content">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Historial de Operaciones</h3>
+            </div>
+            <div class="box-body">
+                <table id="logsTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Usuario</th>
+                            <th>Operación</th>
+                            <th>Módulo</th>
+                            <th>Resultado</th>
+                            <th>Duración (ms)</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal fade" id="detalleModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Detalle de Operación</h4>
+            </div>
+            <div class="modal-body" id="detalleContent"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        let table = $('#logsTable').DataTable({
+            ajax: {
+                url: '/api/logs',
+                dataSrc: ''
+            },
+            order: [[0, 'desc']],
+            columns: [
+                {
+                    data: 'fechaEjecucion',
+                    render: function(data) {
+                        return new Date(data).toLocaleString();
+                    }
+                },
+                { data: 'usuario' },
+                {
+                    data: 'operacion',
+                    render: function(data, type, row) {
+                        return `${data}<br><code>${row.comando}</code>`;
+                    }
+                },
+                { data: 'modulo' },
+                {
+                    data: 'resultado',
+                    render: function(data) {
+                        const colors = { EXITOSO: 'success', ERROR: 'danger', DENEGADO: 'warning' };
+                        return `<span class="label label-${colors[data]}">${data}</span>`;
+                    }
+                },
+                { data: 'duracionMs' },
+                {
+                    data: null,
+                    render: function(data) {
+                        return `<button class="btn btn-sm btn-info btnDetalle" data-id="${data.idLog}">
+                            <i class="fa fa-eye"></i>
+                        </button>`;
+                    }
+                }
+            ],
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+            }
+        });
+
+        $(document).on('click', '.btnDetalle', function() {
+            const id = $(this).data('id');
+            $.get(`/api/logs/${id}`, function(log) {
+                $('#detalleContent').html(`
+                    <dl class="dl-horizontal">
+                        <dt>Fecha:</dt><dd>${new Date(log.fechaEjecucion).toLocaleString()}</dd>
+                        <dt>Usuario:</dt><dd>${log.usuario} (${log.email})</dd>
+                        <dt>Operación:</dt><dd>${log.operacion}</dd>
+                        <dt>Comando:</dt><dd><code>${log.comando}</code></dd>
+                        <dt>Módulo:</dt><dd>${log.modulo}</dd>
+                        <dt>Resultado:</dt><dd><span class="label label-${log.resultado === 'EXITOSO' ? 'success' : 'danger'}">${log.resultado}</span></dd>
+                        <dt>Duración:</dt><dd>${log.duracionMs} ms</dd>
+                        <dt>Telegram:</dt><dd>${log.telegramUsername || 'N/A'}</dd>
+                        <dt>Parámetros:</dt><dd><pre>${log.parametros || 'N/A'}</pre></dd>
+                        <dt>Error:</dt><dd><pre>${log.mensajeError || 'N/A'}</pre></dd>
+                        <dt>IP:</dt><dd>${log.ipOrigen || 'N/A'}</dd>
+                    </dl>
+                `);
+                $('#detalleModal').modal('show');
+            });
+        });
+    });
+</script>

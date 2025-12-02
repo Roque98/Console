@@ -1,0 +1,188 @@
+@{
+    ViewData["Title"] = "Módulos - Administración Bot";
+}
+
+<link rel="stylesheet" href="~/adminLTE/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>Gestión de Módulos</h1>
+    </section>
+
+    <section class="content">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Lista de Módulos</h3>
+                <button type="button" class="btn btn-primary pull-right" id="btnNuevo">
+                    <i class="fa fa-plus"></i> Nuevo Módulo
+                </button>
+            </div>
+            <div class="box-body">
+                <table id="modulosTable" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Icono</th>
+                            <th>Orden</th>
+                            <th>Operaciones</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="moduloModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" id="modalTitle">Nuevo Módulo</h4>
+            </div>
+            <div class="modal-body">
+                <form id="moduloForm">
+                    <input type="hidden" id="idModulo">
+                    <div class="form-group">
+                        <label>Nombre *</label>
+                        <input type="text" class="form-control" id="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción *</label>
+                        <textarea class="form-control" id="descripcion" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Icono (FontAwesome)</label>
+                        <input type="text" class="form-control" id="icono" placeholder="fa-puzzle-piece">
+                        <small class="text-muted">Ej: fa-puzzle-piece, fa-cog, fa-code</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Orden</label>
+                        <input type="number" class="form-control" id="orden" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select class="form-control" id="activo">
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardar">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        let table = $('#modulosTable').DataTable({
+            ajax: {
+                url: '/api/modulos',
+                dataSrc: ''
+            },
+            columns: [
+                { data: 'idModulo' },
+                { data: 'nombre' },
+                { data: 'descripcion' },
+                {
+                    data: 'icono',
+                    render: function(data) {
+                        return `<i class="fa ${data}"></i> ${data}`;
+                    }
+                },
+                { data: 'orden' },
+                { data: 'totalOperaciones' },
+                {
+                    data: 'activo',
+                    render: function(data) {
+                        return data ? '<span class="label label-success">Activo</span>' : '<span class="label label-danger">Inactivo</span>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function(data) {
+                        return `
+                            <button class="btn btn-sm btn-warning btnEditar" data-id="${data.idModulo}">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger btnEliminar" data-id="${data.idModulo}">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        `;
+                    }
+                }
+            ],
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+            }
+        });
+
+        $('#btnNuevo').click(function() {
+            $('#modalTitle').text('Nuevo Módulo');
+            $('#moduloForm')[0].reset();
+            $('#idModulo').val('');
+            $('#moduloModal').modal('show');
+        });
+
+        $(document).on('click', '.btnEditar', function() {
+            const id = $(this).data('id');
+            $.get(`/api/modulos/${id}`, function(data) {
+                $('#modalTitle').text('Editar Módulo');
+                $('#idModulo').val(data.idModulo);
+                $('#nombre').val(data.nombre);
+                $('#descripcion').val(data.descripcion);
+                $('#icono').val(data.icono);
+                $('#orden').val(data.orden);
+                $('#activo').val(data.activo.toString());
+                $('#moduloModal').modal('show');
+            });
+        });
+
+        $('#btnGuardar').click(function() {
+            const id = $('#idModulo').val();
+            const url = id ? `/api/modulos/${id}` : '/api/modulos';
+            const method = id ? 'PUT' : 'POST';
+
+            $.ajax({
+                url: url,
+                type: method,
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    idModulo: id || 0,
+                    nombre: $('#nombre').val(),
+                    descripcion: $('#descripcion').val(),
+                    icono: $('#icono').val(),
+                    orden: parseInt($('#orden').val()),
+                    activo: $('#activo').val() === 'true'
+                }),
+                success: function() {
+                    $('#moduloModal').modal('hide');
+                    table.ajax.reload();
+                }
+            });
+        });
+
+        $(document).on('click', '.btnEliminar', function() {
+            if (confirm('¿Está seguro de eliminar este módulo?')) {
+                const id = $(this).data('id');
+                $.ajax({
+                    url: `/api/modulos/${id}`,
+                    type: 'DELETE',
+                    success: function() {
+                        table.ajax.reload();
+                    }
+                });
+            }
+        });
+    });
+</script>

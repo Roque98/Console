@@ -1,0 +1,319 @@
+@{
+    ViewData["Title"] = "Knowledge Base - Administración Bot";
+}
+
+<link rel="stylesheet" href="~/adminLTE/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>Knowledge Base</h1>
+    </section>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Categorías</h3>
+                        <button type="button" class="btn btn-primary btn-sm pull-right" id="btnNuevaCategoria">
+                            <i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="box-body">
+                        <div class="list-group" id="categoriesList"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="box box-success">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Entradas de Conocimiento</h3>
+                        <button type="button" class="btn btn-primary pull-right" id="btnNueva">
+                            <i class="fa fa-plus"></i> Nueva Entrada
+                        </button>
+                    </div>
+                    <div class="box-body">
+                        <table id="entradasTable" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Pregunta</th>
+                                    <th>Categoría</th>
+                                    <th>Prioridad</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="entradaModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Nueva Entrada</h4>
+            </div>
+            <div class="modal-body">
+                <form id="entradaForm">
+                    <input type="hidden" id="id">
+                    <div class="form-group">
+                        <label>Categoría</label>
+                        <select class="form-control" id="categoryId" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Pregunta</label>
+                        <input type="text" class="form-control" id="question" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Respuesta</label>
+                        <textarea class="form-control" id="answer" rows="5" required></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Keywords (separadas por comas)</label>
+                                <input type="text" class="form-control" id="keywords">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Prioridad</label>
+                                <input type="number" class="form-control" id="priority" value="1">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardar">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Categoría -->
+<div class="modal fade" id="categoriaModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Nueva Categoría</h4>
+            </div>
+            <div class="modal-body">
+                <form id="categoriaForm">
+                    <input type="hidden" id="catId">
+                    <div class="form-group">
+                        <label>Nombre (identificador)</label>
+                        <input type="text" class="form-control" id="catName" required
+                               placeholder="ej: general, tecnico, administrativo">
+                        <small class="text-muted">Solo minúsculas, sin espacios ni caracteres especiales</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre para Mostrar</label>
+                        <input type="text" class="form-control" id="catDisplayName" required
+                               placeholder="ej: General, Técnico, Administrativo">
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea class="form-control" id="catDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Icono (Font Awesome)</label>
+                        <input type="text" class="form-control" id="catIcon"
+                               placeholder="ej: fa-folder, fa-cog, fa-book">
+                        <small class="text-muted">
+                            Ver iconos en: <a href="https://fontawesome.com/v4/icons/" target="_blank">Font Awesome 4</a>
+                        </small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnGuardarCategoria">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        cargarCategorias();
+        let table;
+
+        function cargarCategorias() {
+            $.get('/api/knowledge/categories', function(cats) {
+                const list = $('#categoriesList');
+                const select = $('#categoryId');
+                list.empty();
+                select.empty();
+
+                cats.forEach(function(cat) {
+                    list.append(`
+                        <a href="#" class="list-group-item cat-item" data-id="${cat.id}">
+                            <i class="fa ${cat.icon}"></i> ${cat.displayName}
+                            <span class="badge">${cat.totalEntradas}</span>
+                        </a>
+                    `);
+                    select.append(`<option value="${cat.id}">${cat.displayName}</option>`);
+                });
+
+                cargarEntradas();
+            });
+        }
+
+        function cargarEntradas(categoryId) {
+            const url = categoryId ? `/api/knowledge/entries/category/${categoryId}` : '/api/knowledge/entries';
+
+            if (!table) {
+                table = $('#entradasTable').DataTable({
+                    ajax: { url: url, dataSrc: '' },
+                    columns: [
+                        {
+                            data: 'question',
+                            render: function(data, type, row) {
+                                return `<strong>${data}</strong><br><small>${row.answer.substring(0, 100)}...</small>`;
+                            }
+                        },
+                        {
+                            data: 'categoryDisplayName',
+                            render: function(data, type, row) {
+                                return `<i class="fa ${row.categoryIcon}"></i> ${data}`;
+                            }
+                        },
+                        { data: 'priority' },
+                        {
+                            data: null,
+                            render: function(data) {
+                                return `
+                                    <button class="btn btn-sm btn-warning btnEditar" data-id="${data.id}">
+                                        <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger btnEliminar" data-id="${data.id}">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                `;
+                            }
+                        }
+                    ],
+                    language: { url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json' }
+                });
+            } else {
+                table.ajax.url(url).load();
+            }
+        }
+
+        $(document).on('click', '.cat-item', function(e) {
+            e.preventDefault();
+            $('.cat-item').removeClass('active');
+            $(this).addClass('active');
+            const catId = $(this).data('id');
+            cargarEntradas(catId);
+        });
+
+        $('#btnNueva').click(function() {
+            $('#entradaForm')[0].reset();
+            $('#id').val('');
+            $('#entradaModal').modal('show');
+        });
+
+        $('#btnGuardar').click(function() {
+            const id = $('#id').val();
+            const url = id ? `/api/knowledge/entries/${id}` : '/api/knowledge/entries';
+            const method = id ? 'PUT' : 'POST';
+
+            $.ajax({
+                url: url,
+                type: method,
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    id: id || 0,
+                    categoryId: parseInt($('#categoryId').val()),
+                    question: $('#question').val(),
+                    answer: $('#answer').val(),
+                    keywords: $('#keywords').val(),
+                    priority: parseInt($('#priority').val())
+                }),
+                success: function() {
+                    $('#entradaModal').modal('hide');
+                    table.ajax.reload();
+                }
+            });
+        });
+
+        $(document).on('click', '.btnEliminar', function() {
+            if (confirm('¿Eliminar esta entrada?')) {
+                const id = $(this).data('id');
+                $.ajax({
+                    url: `/api/knowledge/entries/${id}`,
+                    type: 'DELETE',
+                    success: function() { table.ajax.reload(); }
+                });
+            }
+        });
+
+        // Gestión de Categorías
+        $('#btnNuevaCategoria').click(function() {
+            $('#categoriaForm')[0].reset();
+            $('#catId').val('');
+            $('#categoriaModal .modal-title').text('Nueva Categoría');
+            $('#categoriaModal').modal('show');
+        });
+
+        $('#btnGuardarCategoria').click(function() {
+            const id = $('#catId').val();
+            const url = id ? `/api/knowledge/categories/${id}` : '/api/knowledge/categories';
+            const method = id ? 'PUT' : 'POST';
+
+            const data = {
+                id: id || 0,
+                name: $('#catName').val(),
+                displayName: $('#catDisplayName').val(),
+                description: $('#catDescription').val(),
+                icon: $('#catIcon').val() || 'fa-folder',
+                active: true
+            };
+
+            $.ajax({
+                url: url,
+                type: method,
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function() {
+                    $('#categoriaModal').modal('hide');
+                    cargarCategorias();
+                    if (table) {
+                        table.ajax.reload();
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error al guardar la categoría: ' + (xhr.responseText || 'Error desconocido'));
+                }
+            });
+        });
+
+        // Editar categoría (doble clic en la lista)
+        $(document).on('dblclick', '.cat-item', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const catId = $(this).data('id');
+
+            $.get(`/api/knowledge/categories/${catId}`, function(cat) {
+                $('#catId').val(cat.id);
+                $('#catName').val(cat.name);
+                $('#catDisplayName').val(cat.displayName);
+                $('#catDescription').val(cat.description);
+                $('#catIcon').val(cat.icon);
+                $('#categoriaModal .modal-title').text('Editar Categoría');
+                $('#categoriaModal').modal('show');
+            });
+        });
+    });
+</script>

@@ -1,0 +1,194 @@
+@{
+    ViewData["Title"] = "Mi Perfil - Mi Cuenta";
+}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+            Mi Perfil
+            <small>Información personal y configuración</small>
+        </h1>
+    </section>
+
+    <section class="content">
+        <!-- Info boxes -->
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-aqua"><i class="fa fa-user"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Usuario</span>
+                        <span class="info-box-number" id="txtUsuario">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-green"><i class="fa fa-telegram"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Cuentas Telegram</span>
+                        <span class="info-box-number" id="txtTotalCuentas">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-yellow"><i class="fa fa-check-circle"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Cuentas Activas</span>
+                        <span class="info-box-number" id="txtCuentasActivas">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-red"><i class="fa fa-clock-o"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Última Actividad</span>
+                        <span class="info-box-number" id="txtUltimaActividad" style="font-size: 14px;">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Información Personal -->
+            <div class="col-md-6">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-user"></i> Información Personal</h3>
+                    </div>
+                    <div class="box-body">
+                        <dl class="dl-horizontal">
+                            <dt>Usuario:</dt>
+                            <dd id="ddUsuario">-</dd>
+                            <dt>Cuenta Principal:</dt>
+                            <dd id="ddCuentaPrincipal">-</dd>
+                            <dt>Telegram Username:</dt>
+                            <dd id="ddTelegramUsername">-</dd>
+                            <dt>Chat ID:</dt>
+                            <dd id="ddChatId">-</dd>
+                            <dt>Fecha de Registro:</dt>
+                            <dd id="ddFechaRegistro">-</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Roles y Permisos -->
+            <div class="col-md-6">
+                <div class="box box-success">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-shield"></i> Mis Roles</h3>
+                    </div>
+                    <div class="box-body">
+                        <div id="rolesContainer">
+                            <p class="text-muted">Cargando roles...</p>
+                        </div>
+                    </div>
+                    <div class="box-footer">
+                        <a href="@Url.Action("Index", "MisPermisos")" class="btn btn-sm btn-success">
+                            <i class="fa fa-list"></i> Ver Todos Mis Permisos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accesos Rápidos -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-warning">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-rocket"></i> Accesos Rápidos</h3>
+                    </div>
+                    <div class="box-body">
+                        <a href="@Url.Action("Index", "DashboardPersonal")" class="btn btn-app">
+                            <i class="fa fa-dashboard"></i> Dashboard
+                        </a>
+                        <a href="@Url.Action("Index", "MisCuentasTelegram")" class="btn btn-app">
+                            <i class="fa fa-telegram"></i> Mis Cuentas
+                        </a>
+                        <a href="@Url.Action("Index", "MisOperaciones")" class="btn btn-app">
+                            <i class="fa fa-history"></i> Mis Operaciones
+                        </a>
+                        <a href="@Url.Action("Index", "MisPermisos")" class="btn btn-app">
+                            <i class="fa fa-shield"></i> Mis Permisos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    $(document).ready(function () {
+        cargarPerfil();
+        cargarRoles();
+
+        function cargarPerfil() {
+            $.get('/api/mi-perfil', function(data) {
+                $('#txtUsuario').text(data.usuario);
+                $('#txtTotalCuentas').text(data.totalCuentas);
+                $('#txtCuentasActivas').text(data.cuentasActivas);
+
+                if (data.ultimaActividad) {
+                    $('#txtUltimaActividad').text(new Date(data.ultimaActividad).toLocaleString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }));
+                }
+
+                $('#ddUsuario').text(data.usuario);
+
+                if (data.cuentaPrincipal) {
+                    $('#ddCuentaPrincipal').html(
+                        data.cuentaPrincipal.telegramFirstName + ' ' +
+                        (data.cuentaPrincipal.telegramLastName || '') +
+                        ' <span class="label label-warning">Principal</span>'
+                    );
+                    $('#ddTelegramUsername').text('@@' + data.cuentaPrincipal.telegramUsername);
+                    $('#ddChatId').text(data.cuentaPrincipal.telegramChatId);
+                } else {
+                    $('#ddCuentaPrincipal').html('<span class="text-danger">No hay cuenta principal configurada</span>');
+                    $('#ddTelegramUsername').text('-');
+                    $('#ddChatId').text('-');
+                }
+
+                if (data.fechaRegistro) {
+                    $('#ddFechaRegistro').text(new Date(data.fechaRegistro).toLocaleDateString('es-ES'));
+                } else {
+                    $('#ddFechaRegistro').text('-');
+                }
+            });
+        }
+
+        function cargarRoles() {
+            $.get('/api/mi-perfil/roles', function(data) {
+                if (data.length === 0) {
+                    $('#rolesContainer').html('<p class="text-muted">No tienes roles asignados</p>');
+                    return;
+                }
+
+                let html = '<ul class="list-unstyled">';
+                data.forEach(function(rol) {
+                    html += `
+                        <li style="margin-bottom: 10px;">
+                            <span class="label label-success"><i class="fa fa-shield"></i> ${rol.nombre}</span>
+                            <p class="text-muted" style="margin-left: 10px; margin-top: 5px;">
+                                <small>${rol.descripcion}</small>
+                            </p>
+                        </li>`;
+                });
+                html += '</ul>';
+                $('#rolesContainer').html(html);
+            });
+        }
+    });
+</script>

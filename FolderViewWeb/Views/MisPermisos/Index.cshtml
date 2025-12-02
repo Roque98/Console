@@ -1,0 +1,237 @@
+@{
+    ViewData["Title"] = "Mis Permisos - Mi Cuenta";
+}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+            Mis Permisos
+            <small>Operaciones que puedes ejecutar</small>
+        </h1>
+    </section>
+
+    <section class="content">
+        <!-- Información de Roles -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-success">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-shield"></i> Mis Roles Asignados</h3>
+                    </div>
+                    <div class="box-body" id="rolesContainer">
+                        <p class="text-muted"><i class="fa fa-spinner fa-spin"></i> Cargando roles...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verificador de Permisos -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-warning">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-search"></i> Verificar Permiso</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <input type="text"
+                                       class="form-control"
+                                       id="txtComando"
+                                       placeholder="Ingresa el comando a verificar (ej: /ver_usuarios, /generar_reporte)">
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-warning btn-block" id="btnVerificar">
+                                    <i class="fa fa-search"></i> Verificar Permiso
+                                </button>
+                            </div>
+                        </div>
+                        <div id="resultadoVerificacion" style="margin-top: 15px; display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Listado de Permisos por Módulo -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-list"></i> Operaciones Permitidas por Módulo</h3>
+                    </div>
+                    <div class="box-body" id="permisosContainer">
+                        <p class="text-muted"><i class="fa fa-spinner fa-spin"></i> Cargando permisos...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+    $(document).ready(function () {
+        cargarRoles();
+        cargarPermisos();
+
+        function cargarRoles() {
+            $.get('/api/mis-permisos/roles', function(data) {
+                if (!data || data.length === 0) {
+                    $('#rolesContainer').html('<p class="text-muted">No tienes roles asignados.</p>');
+                    return;
+                }
+
+                let html = '<div class="row">';
+                data.forEach(function(rol) {
+                    html += `
+                        <div class="col-md-4">
+                            <div class="info-box bg-green">
+                                <span class="info-box-icon"><i class="fa fa-shield"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">${rol.nombre}</span>
+                                    <span class="info-box-number">${rol.totalPermisos} permisos</span>
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: 100%"></div>
+                                    </div>
+                                    <span class="progress-description">
+                                        Nivel ${rol.nivel} - ${rol.descripcion}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+                html += '</div>';
+                $('#rolesContainer').html(html);
+            });
+        }
+
+        function cargarPermisos() {
+            $.get('/api/mis-permisos/operaciones', function(data) {
+                if (!data || data.length === 0) {
+                    $('#permisosContainer').html('<p class="text-muted">No tienes permisos asignados.</p>');
+                    return;
+                }
+
+                let html = '';
+                data.forEach(function(modulo) {
+                    html += `
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    <i class="${modulo.moduloIcono || 'fa fa-folder'}"></i>
+                                    ${modulo.modulo}
+                                    <span class="badge pull-right">${modulo.operaciones.length} operaciones</span>
+                                </h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-condensed">
+                                        <thead>
+                                            <tr>
+                                                <th>Operación</th>
+                                                <th>Comando</th>
+                                                <th>Descripción</th>
+                                                <th>Tipo</th>
+                                                <th>Poder</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>`;
+
+                    modulo.operaciones.forEach(function(op) {
+                        const tipoBadge = op.tipoPermiso === 'ROL'
+                            ? '<span class="label label-primary">Rol</span>'
+                            : '<span class="label label-success">Personal</span>';
+
+                        const poderIcon = op.tienePoder
+                            ? '<i class="fa fa-bolt text-yellow" title="Requiere poder especial"></i>'
+                            : '<i class="fa fa-check text-green"></i>';
+
+                        const reqParams = op.requiereParametros
+                            ? '<small class="text-muted">(requiere parámetros)</small>'
+                            : '';
+
+                        html += `
+                            <tr>
+                                <td><strong>${op.nombre}</strong></td>
+                                <td><code>${op.comando}</code> ${reqParams}</td>
+                                <td>${op.descripcion || '-'}</td>
+                                <td>${tipoBadge}</td>
+                                <td class="text-center">${poderIcon}</td>
+                            </tr>`;
+                    });
+
+                    html += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+
+                $('#permisosContainer').html(html);
+            });
+        }
+
+        // Verificar permiso específico
+        $('#btnVerificar').click(function() {
+            const comando = $('#txtComando').val().trim();
+
+            if (!comando) {
+                $('#resultadoVerificacion')
+                    .html('<div class="alert alert-warning"><i class="fa fa-warning"></i> Por favor ingresa un comando.</div>')
+                    .slideDown();
+                return;
+            }
+
+            $.get(`/api/mis-permisos/verificar/${encodeURIComponent(comando)}`, function(data) {
+                let html = '';
+
+                if (data.tienePermiso) {
+                    html = `
+                        <div class="alert alert-success">
+                            <h4><i class="fa fa-check-circle"></i> Tienes permiso para ejecutar este comando</h4>
+                            <hr>
+                            <dl class="dl-horizontal">
+                                <dt>Operación:</dt>
+                                <dd><strong>${data.operacion.nombre}</strong></dd>
+                                <dt>Comando:</dt>
+                                <dd><code>${data.operacion.comando}</code></dd>
+                                <dt>Módulo:</dt>
+                                <dd>${data.operacion.modulo}</dd>
+                                <dt>Descripción:</dt>
+                                <dd>${data.operacion.descripcion || '-'}</dd>
+                                ${data.operacion.requiereParametros
+                                    ? '<dt>Parámetros:</dt><dd><span class="label label-warning">Requiere parámetros</span></dd>'
+                                    : ''}
+                                ${data.operacion.tienePoder
+                                    ? '<dt>Poder:</dt><dd><i class="fa fa-bolt text-yellow"></i> Requiere poder especial</dd>'
+                                    : ''}
+                            </dl>
+                        </div>`;
+                } else {
+                    html = `
+                        <div class="alert alert-danger">
+                            <h4><i class="fa fa-times-circle"></i> No tienes permiso para ejecutar este comando</h4>
+                            <p>El comando <code>${comando}</code> no está disponible para tu usuario.</p>
+                            <p class="text-muted">
+                                <small>Si crees que deberías tener acceso a este comando,
+                                contacta con el administrador del sistema.</small>
+                            </p>
+                        </div>`;
+                }
+
+                $('#resultadoVerificacion').html(html).slideDown();
+            }).fail(function() {
+                $('#resultadoVerificacion')
+                    .html('<div class="alert alert-danger"><i class="fa fa-error"></i> Error al verificar el permiso.</div>')
+                    .slideDown();
+            });
+        });
+
+        // Permitir verificar con Enter
+        $('#txtComando').keypress(function(e) {
+            if (e.which === 13) {
+                $('#btnVerificar').click();
+            }
+        });
+    });
+</script>

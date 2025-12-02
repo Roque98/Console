@@ -2,6 +2,8 @@ using FolderView.Dapper;
 using FolderView.Dapper.Repositorios;
 using FolderView.Dapper.Interfaces;
 using FolderView.Dapper.CodeGenerator.Repositorios;
+using FolderView.Dapper.AdministracionBot.Interfaces;
+using FolderView.Dapper.AdministracionBot.Repositorios;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,17 @@ builder.Services.AddScoped<IProyectoRepository, ProyectoRepositorio>();
 builder.Services.AddScoped<ICodeGeneratorIArchivoRepository, CodeGeneratorArchivoRepositorio>();
 builder.Services.AddScoped<IPromptTemplateRepository, PromptTemplateRepositorio>();
 builder.Services.AddScoped<IParametrosPromptTemplateRepository, ParametrosPromptTemplateRepositorio>();
+
+// Agregar servicios para el Módulo de Administración del Bot
+builder.Services.AddScoped<IDashboardRepository, DashboardRepositorio>();
+builder.Services.AddScoped<IModuloRepository, ModuloRepositorio>();
+builder.Services.AddScoped<IOperacionRepository, OperacionRepositorio>();
+builder.Services.AddScoped<IRolRepository, RolRepositorio>();
+builder.Services.AddScoped<ILogOperacionRepository, LogOperacionRepositorio>();
+builder.Services.AddScoped<IUsuarioTelegramRepository, UsuarioTelegramRepositorio>();
+builder.Services.AddScoped<IKnowledgeRepository, KnowledgeRepositorio>();
+builder.Services.AddScoped<IRolIARepository, RolIARepositorio>();
+
 builder.Services.AddControllers();
 
 var app = builder.Build();
