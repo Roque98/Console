@@ -6,7 +6,7 @@
     <section class="content-header">
         <h1>
             Mis Permisos
-            <small>Operaciones que puedes ejecutar</small>
+            <small>Comandos Telegram que puedes ejecutar</small>
         </h1>
     </section>
 
@@ -57,7 +57,14 @@
             <div class="col-md-12">
                 <div class="box box-primary">
                     <div class="box-header with-border">
-                        <h3 class="box-title"><i class="fa fa-list"></i> Operaciones Permitidas por Módulo</h3>
+                        <h3 class="box-title"><i class="fa fa-list"></i> Comandos Telegram Permitidos por Módulo</h3>
+                        <div class="pull-right">
+                            <small>
+                                <strong>Leyenda:</strong> &nbsp;
+                                <i class="fa fa-check text-green"></i> Normal &nbsp;&nbsp;
+                                <i class="fa fa-bolt text-yellow"></i> Crítico
+                            </small>
+                        </div>
                     </div>
                     <div class="box-body" id="permisosContainer">
                         <p class="text-muted"><i class="fa fa-spinner fa-spin"></i> Cargando permisos...</p>
@@ -119,7 +126,7 @@
                                 <h3 class="panel-title">
                                     <i class="${modulo.moduloIcono || 'fa fa-folder'}"></i>
                                     ${modulo.modulo}
-                                    <span class="badge pull-right">${modulo.operaciones.length} operaciones</span>
+                                    <span class="badge pull-right">${modulo.operaciones.length} comandos</span>
                                 </h3>
                             </div>
                             <div class="panel-body">
@@ -127,23 +134,23 @@
                                     <table class="table table-hover table-condensed">
                                         <thead>
                                             <tr>
-                                                <th>Operación</th>
                                                 <th>Comando</th>
+                                                <th>Sintaxis</th>
                                                 <th>Descripción</th>
                                                 <th>Tipo</th>
-                                                <th>Poder</th>
+                                                <th style="text-align:center;">Nivel de Acceso</th>
                                             </tr>
                                         </thead>
                                         <tbody>`;
 
                     modulo.operaciones.forEach(function(op) {
                         const tipoBadge = op.tipoPermiso === 'ROL'
-                            ? '<span class="label label-primary">Rol</span>'
-                            : '<span class="label label-success">Personal</span>';
+                            ? '<span class="label label-primary" title="Permiso heredado del rol"><i class="fa fa-shield"></i> Rol</span>'
+                            : '<span class="label label-success" title="Permiso asignado directamente"><i class="fa fa-user"></i> Personal</span>';
 
                         const poderIcon = op.tienePoder
-                            ? '<i class="fa fa-bolt text-yellow" title="Requiere poder especial"></i>'
-                            : '<i class="fa fa-check text-green"></i>';
+                            ? '<i class="fa fa-bolt text-yellow" title="⚠️ Comando crítico - Requiere autorización especial o privilegios elevados"></i> <span class="text-muted" style="font-size:11px;">Crítico</span>'
+                            : '<i class="fa fa-check text-green" title="✓ Comando estándar - Puedes ejecutarlo sin restricciones adicionales"></i> <span class="text-muted" style="font-size:11px;">Normal</span>';
 
                         const reqParams = op.requiereParametros
                             ? '<small class="text-muted">(requiere parámetros)</small>'
@@ -188,23 +195,23 @@
                 if (data.tienePermiso) {
                     html = `
                         <div class="alert alert-success">
-                            <h4><i class="fa fa-check-circle"></i> Tienes permiso para ejecutar este comando</h4>
+                            <h4><i class="fa fa-check-circle"></i> ✓ Tienes permiso para ejecutar este comando</h4>
                             <hr>
                             <dl class="dl-horizontal">
-                                <dt>Operación:</dt>
-                                <dd><strong>${data.operacion.nombre}</strong></dd>
                                 <dt>Comando:</dt>
+                                <dd><strong>${data.operacion.nombre}</strong></dd>
+                                <dt>Sintaxis:</dt>
                                 <dd><code>${data.operacion.comando}</code></dd>
                                 <dt>Módulo:</dt>
-                                <dd>${data.operacion.modulo}</dd>
+                                <dd><i class="${data.operacion.moduloIcono || 'fa fa-folder'}"></i> ${data.operacion.modulo}</dd>
                                 <dt>Descripción:</dt>
                                 <dd>${data.operacion.descripcion || '-'}</dd>
                                 ${data.operacion.requiereParametros
-                                    ? '<dt>Parámetros:</dt><dd><span class="label label-warning">Requiere parámetros</span></dd>'
+                                    ? '<dt>Parámetros:</dt><dd><span class="label label-warning"><i class="fa fa-info-circle"></i> Requiere parámetros adicionales</span></dd>'
                                     : ''}
                                 ${data.operacion.tienePoder
-                                    ? '<dt>Poder:</dt><dd><i class="fa fa-bolt text-yellow"></i> Requiere poder especial</dd>'
-                                    : ''}
+                                    ? '<dt>Nivel de Acceso:</dt><dd><i class="fa fa-bolt text-yellow"></i> <strong>Crítico</strong> - Requiere autorización especial</dd>'
+                                    : '<dt>Nivel de Acceso:</dt><dd><i class="fa fa-check text-green"></i> <strong>Normal</strong> - Sin restricciones adicionales</dd>'}
                             </dl>
                         </div>`;
                 } else {
