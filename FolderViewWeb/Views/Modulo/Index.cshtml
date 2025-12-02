@@ -3,6 +3,7 @@
 }
 
 <link rel="stylesheet" href="~/adminLTE/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+<link rel="stylesheet" href="~/adminLTE/bower_components/select2/dist/css/select2.min.css">
 
 <div class="content-wrapper">
     <section class="content-header">
@@ -58,9 +59,16 @@
                         <textarea class="form-control" id="descripcion" rows="3" required></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Icono (FontAwesome)</label>
-                        <input type="text" class="form-control" id="icono" placeholder="fa-puzzle-piece">
-                        <small class="text-muted">Ej: fa-puzzle-piece, fa-cog, fa-code</small>
+                        <label>Icono *</label>
+                        <div class="input-group">
+                            <span class="input-group-addon">
+                                <i class="fa fa-question" id="iconoPreview"></i>
+                            </span>
+                            <select class="form-control select2" id="icono" style="width: 100%;">
+                                <option value="">Seleccione un icono...</option>
+                            </select>
+                        </div>
+                        <small class="text-muted">Busque y seleccione un icono de la lista</small>
                     </div>
                     <div class="form-group">
                         <label>Orden</label>
@@ -83,8 +91,80 @@
     </div>
 </div>
 
+<script src="~/adminLTE/bower_components/select2/dist/js/select2.full.min.js"></script>
 <script>
     $(document).ready(function () {
+        let iconosData = [];
+
+        // Cargar iconos desde la API
+        function cargarIconos() {
+            $.get('/api/iconos', function(data) {
+                iconosData = data;
+                let $select = $('#icono');
+                $select.empty();
+                $select.append('<option value="">Seleccione un icono...</option>');
+
+                // Agrupar por categoría
+                let categorias = {};
+                data.forEach(function(icono) {
+                    if (!categorias[icono.categoria]) {
+                        categorias[icono.categoria] = [];
+                    }
+                    categorias[icono.categoria].push(icono);
+                });
+
+                // Agregar opciones agrupadas
+                Object.keys(categorias).sort().forEach(function(categoria) {
+                    let $optgroup = $('<optgroup label="' + categoria + '"></optgroup>');
+                    categorias[categoria].forEach(function(icono) {
+                        $optgroup.append(
+                            `<option value="${icono.clase}" data-icon="${icono.clase}">
+                                ${icono.nombre} - ${icono.descripcion || ''}
+                            </option>`
+                        );
+                    });
+                    $select.append($optgroup);
+                });
+
+                // Inicializar Select2 con template personalizado
+                $select.select2({
+                    templateResult: formatIcono,
+                    templateSelection: formatIconoSelection,
+                    width: '100%',
+                    placeholder: 'Busque un icono...',
+                    allowClear: true
+                });
+            });
+        }
+
+        // Formato para mostrar iconos en el dropdown
+        function formatIcono(icono) {
+            if (!icono.id) return icono.text;
+            let $icono = $(
+                '<span><i class="fa ' + $(icono.element).val() + '"></i> ' + icono.text + '</span>'
+            );
+            return $icono;
+        }
+
+        // Formato para mostrar el icono seleccionado
+        function formatIconoSelection(icono) {
+            if (!icono.id) return icono.text;
+            return icono.text;
+        }
+
+        // Actualizar vista previa del icono
+        $('#icono').on('change', function() {
+            let iconoClase = $(this).val();
+            if (iconoClase) {
+                $('#iconoPreview').attr('class', 'fa ' + iconoClase);
+            } else {
+                $('#iconoPreview').attr('class', 'fa fa-question');
+            }
+        });
+
+        // Cargar iconos al iniciar
+        cargarIconos();
+
         let table = $('#modulosTable').DataTable({
             ajax: {
                 url: '/api/modulos',
@@ -131,6 +211,8 @@
             $('#modalTitle').text('Nuevo Módulo');
             $('#moduloForm')[0].reset();
             $('#idModulo').val('');
+            $('#icono').val('').trigger('change');
+            $('#iconoPreview').attr('class', 'fa fa-question');
             $('#moduloModal').modal('show');
         });
 
@@ -141,7 +223,8 @@
                 $('#idModulo').val(data.idModulo);
                 $('#nombre').val(data.nombre);
                 $('#descripcion').val(data.descripcion);
-                $('#icono').val(data.icono);
+                $('#icono').val(data.icono).trigger('change');
+                $('#iconoPreview').attr('class', 'fa ' + data.icono);
                 $('#orden').val(data.orden);
                 $('#activo').val(data.activo.toString());
                 $('#moduloModal').modal('show');

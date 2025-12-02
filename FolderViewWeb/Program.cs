@@ -28,6 +28,7 @@ builder.Services.AddScoped<ILogOperacionRepository, LogOperacionRepositorio>();
 builder.Services.AddScoped<IUsuarioTelegramRepository, UsuarioTelegramRepositorio>();
 builder.Services.AddScoped<IKnowledgeRepository, KnowledgeRepositorio>();
 builder.Services.AddScoped<IRolIARepository, RolIARepositorio>();
+builder.Services.AddScoped<IIconoRepository, IconoRepositorio>();
 
 builder.Services.AddControllers();
 
