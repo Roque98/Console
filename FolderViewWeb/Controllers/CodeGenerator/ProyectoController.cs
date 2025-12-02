@@ -9,10 +9,15 @@ namespace FolderView.Controllers
     public class ProyectoController : Controller
     {
         private readonly IProyectoRepository _proyectoRepositorio;
+        private readonly ITipoProyectoRepository _tipoProyectoRepository;
 
-        public ProyectoController(IProyectoRepository proyectoRepositorio)
+        public ProyectoController(
+            IProyectoRepository proyectoRepositorio,
+            ITipoProyectoRepository tipoProyectoRepository
+        )
         {
             _proyectoRepositorio = proyectoRepositorio;
+            _tipoProyectoRepository = tipoProyectoRepository;
         }
 
         public IActionResult Index()
@@ -31,18 +36,22 @@ namespace FolderView.Controllers
         public async Task<IActionResult> GetAllByIdTipoProyecto(int id)
         {
             var result = await _proyectoRepositorio.GetAllByIdTipoProyectoAsync(id);
+            foreach (var proyecto in result)
+            {
+                proyecto.TipoProyecto = await _tipoProyectoRepository.GetByIdAsync(proyecto.idTipoProyecto);
+            }
             return Json(result);
         }
 
         [HttpPost("api/proyecto/create")]
-        public async Task<IActionResult> Create(ProyectoEntidad dto)
+        public async Task<IActionResult> Create([FromBody] ProyectoEntidad dto)
         {
             var result = await _proyectoRepositorio.CreateAsync(dto);
             return Json(result);
         }
 
         [HttpPut("api/proyecto/update")]
-        public async Task<IActionResult> Update(ProyectoEntidad dto)
+        public async Task<IActionResult> Update([FromBody] ProyectoEntidad dto)
         {
             var result = await _proyectoRepositorio.UpdateAsync(dto);
             return Json(result);

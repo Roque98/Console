@@ -11,6 +11,7 @@
         public DateTime FechaCreacion { get; set; }
         public DateTime FechaModificacion { get; set; }
         public TipoProyectoEntidad TipoProyecto { get; set; }
-        public List<ParametrosPromptTemplateEntidad> ParametrosPromptTemplate = new List<ParametrosPromptTemplateEntidad>();
+        public List<ParametrosPromptTemplateEntidad> ParametrosPromptTemplate { get; set; }
+        public List<CodeGeneratorArchivoEntidad> Archivos { get; set; }
     }
 }
