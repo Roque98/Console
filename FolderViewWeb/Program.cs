@@ -4,6 +4,7 @@ using FolderView.Dapper.Interfaces;
 using FolderView.Dapper.CodeGenerator.Repositorios;
 using FolderView.Dapper.AdministracionBot.Interfaces;
 using FolderView.Dapper.AdministracionBot.Repositorios;
+using FolderView.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,9 @@ builder.Services.AddScoped<ILogOperacionRepository, LogOperacionRepositorio>();
 builder.Services.AddScoped<IUsuarioTelegramRepository, UsuarioTelegramRepositorio>();
 builder.Services.AddScoped<IKnowledgeRepository, KnowledgeRepositorio>();
 builder.Services.AddScoped<IRolIARepository, RolIARepositorio>();
+
+// Agregar servicio de ChatGPT
+builder.Services.AddHttpClient<IChatGPTService, ChatGPTService>();
 
 builder.Services.AddControllers();
 
