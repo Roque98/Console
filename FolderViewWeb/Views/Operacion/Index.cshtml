@@ -6,7 +6,17 @@
 
 <div class="content-wrapper">
     <section class="content-header">
-        <h1>Gestión de Comandos Telegram</h1>
+        <h1>
+            Gestión de Comandos Telegram
+            <span id="filtroModulo" style="display: none;">
+                <small>
+                    <i class="fa fa-filter"></i> Filtrando por módulo: <strong id="nombreModulo"></strong>
+                    <a href="/Operacion" class="btn btn-xs btn-default" style="margin-left: 10px;">
+                        <i class="fa fa-times"></i> Quitar filtro
+                    </a>
+                </small>
+            </span>
+        </h1>
     </section>
 
     <section class="content">
@@ -128,6 +138,17 @@
     $(document).ready(function () {
         cargarModulos();
 
+        // Obtener parámetros de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const moduloId = urlParams.get('modulo');
+        const moduloNombre = urlParams.get('nombre');
+
+        // Mostrar filtro si existe
+        if (moduloId && moduloNombre) {
+            $('#nombreModulo').text(moduloNombre);
+            $('#filtroModulo').show();
+        }
+
         let table = $('#operacionesTable').DataTable({
             ajax: {
                 url: '/api/operaciones',
@@ -178,6 +199,12 @@
             ],
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+            },
+            initComplete: function() {
+                // Aplicar filtro por módulo si existe
+                if (moduloNombre) {
+                    table.column(1).search(moduloNombre).draw();
+                }
             }
         });
 
