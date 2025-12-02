@@ -181,7 +181,17 @@
                     }
                 },
                 { data: 'orden' },
-                { data: 'totalOperaciones' },
+                {
+                    data: 'totalOperaciones',
+                    render: function(data, type, row) {
+                        if (data > 0) {
+                            return `<a href="/Operacion?modulo=${row.idModulo}" class="badge bg-blue" title="Ver comandos de este módulo">
+                                ${data} <i class="fa fa-external-link"></i>
+                            </a>`;
+                        }
+                        return '<span class="badge bg-gray">0</span>';
+                    }
+                },
                 {
                     data: 'activo',
                     render: function(data) {
@@ -192,10 +202,13 @@
                     data: null,
                     render: function(data) {
                         return `
-                            <button class="btn btn-sm btn-warning btnEditar" data-id="${data.idModulo}">
+                            <button class="btn btn-sm btn-info btnVerComandos" data-id="${data.idModulo}" data-nombre="${data.nombre}" title="Ver comandos">
+                                <i class="fa fa-list"></i>
+                            </button>
+                            <button class="btn btn-sm btn-warning btnEditar" data-id="${data.idModulo}" title="Editar">
                                 <i class="fa fa-edit"></i>
                             </button>
-                            <button class="btn btn-sm btn-danger btnEliminar" data-id="${data.idModulo}">
+                            <button class="btn btn-sm btn-danger btnEliminar" data-id="${data.idModulo}" title="Eliminar">
                                 <i class="fa fa-trash"></i>
                             </button>
                         `;
@@ -266,6 +279,12 @@
                     }
                 });
             }
+        });
+
+        $(document).on('click', '.btnVerComandos', function() {
+            const id = $(this).data('id');
+            const nombre = $(this).data('nombre');
+            window.location.href = `/Operacion?modulo=${id}&nombre=${encodeURIComponent(nombre)}`;
         });
     });
 </script>
