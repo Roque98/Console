@@ -186,7 +186,7 @@
             // Llenar el modal con la información
             $('#idCuentaEstado').val(id);
             $('#usuarioNombre strong').text(rowData.usuario);
-            $('#telegramInfo').html(`<strong>@${rowData.telegramUsername}</strong><br><small>${rowData.telegramFirstName} ${rowData.telegramLastName || ''}</small>`);
+            $('#telegramInfo').html(`<strong>@@${rowData.telegramUsername}</strong><br><small>${rowData.telegramFirstName} ${rowData.telegramLastName || ''}</small>`);
             $('#nuevoEstado').val(rowData.estado);
             $('#motivoCambio').val('');
 
@@ -265,7 +265,7 @@
                     html += `
                         <tr>
                             <td><strong>${c.usuario}</strong><br><small>${c.email || ''}</small></td>
-                            <td>@${c.telegramUsername}<br><small>${c.telegramFirstName} ${c.telegramLastName || ''}</small></td>
+                            <td>@@${c.telegramUsername}<br><small>${c.telegramFirstName} ${c.telegramLastName || ''}</small></td>
                             <td><span class="${horasColor}"><strong>${c.horasSinVerificar}h</strong></span></td>
                             <td>
                                 <button class="btn btn-xs btn-success btnVerificarPendiente" data-id="${c.idUsuarioTelegram}">
