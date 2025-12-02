@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Mis Operaciones - Mi Cuenta";
+    ViewData["Title"] = "Mis Comandos - Mi Cuenta";
 }
 
 <link rel="stylesheet" href="~/adminLTE/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
@@ -7,8 +7,8 @@
 <div class="content-wrapper">
     <section class="content-header">
         <h1>
-            Mis Operaciones
-            <small>Historial de operaciones ejecutadas</small>
+            Mis Comandos Telegram
+            <small>Historial de comandos ejecutados</small>
         </h1>
     </section>
 
@@ -19,7 +19,7 @@
                 <div class="info-box bg-aqua">
                     <span class="info-box-icon"><i class="fa fa-list"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">Total Operaciones</span>
+                        <span class="info-box-text">Total Comandos</span>
                         <span class="info-box-number" id="statTotal">0</span>
                     </div>
                 </div>
@@ -59,7 +59,7 @@
         <!-- Filtros y Tabla -->
         <div class="box box-primary">
             <div class="box-header with-border">
-                <h3 class="box-title"><i class="fa fa-history"></i> Historial de Operaciones</h3>
+                <h3 class="box-title"><i class="fa fa-history"></i> Historial de Comandos</h3>
                 <div class="box-tools pull-right">
                     <button type="button" class="btn btn-sm btn-primary" id="btnFiltrar">
                         <i class="fa fa-filter"></i> Filtrar por Fecha
@@ -93,7 +93,7 @@
                     <thead>
                         <tr>
                             <th>Fecha/Hora</th>
-                            <th>Operación</th>
+                            <th>Comando</th>
                             <th>Módulo</th>
                             <th>Resultado</th>
                             <th>Tiempo (ms)</th>
@@ -114,7 +114,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title"><i class="fa fa-info-circle"></i> Detalle de la Operación</h4>
+                <h4 class="modal-title"><i class="fa fa-info-circle"></i> Detalle del Comando</h4>
             </div>
             <div class="modal-body" id="detalleContent">
                 <p class="text-center"><i class="fa fa-spinner fa-spin"></i> Cargando...</p>
@@ -245,7 +245,7 @@
             $.get(`/api/mis-operaciones/${id}`, function(data) {
                 let html = '<dl class="dl-horizontal">';
                 html += `<dt>ID Log:</dt><dd>${data.idLog}</dd>`;
-                html += `<dt>Operación:</dt><dd><strong>${data.operacion}</strong></dd>`;
+                html += `<dt>Comando:</dt><dd><strong>${data.operacion}</strong></dd>`;
                 html += `<dt>Módulo:</dt><dd>${data.modulo}</dd>`;
                 html += `<dt>Comando:</dt><dd><code>${data.comando || '-'}</code></dd>`;
                 html += `<dt>Fecha/Hora:</dt><dd>${new Date(data.fechaHora).toLocaleString('es-ES')}</dd>`;
