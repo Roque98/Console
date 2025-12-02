@@ -2,6 +2,44 @@
     ViewData["Title"] = "Mis Permisos - Mi Cuenta";
 }
 
+<style>
+    .panel-heading {
+        transition: background-color 0.3s ease;
+    }
+
+    .panel-heading:hover {
+        background-color: #286090 !important;
+    }
+
+    .panel-title {
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    .modulo-panel {
+        margin-bottom: 10px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+
+    .modulo-panel .panel-heading {
+        border-radius: 4px 4px 0 0;
+    }
+
+    .comando-row {
+        transition: background-color 0.2s ease;
+    }
+
+    .comando-row:hover {
+        background-color: #f5f5f5;
+    }
+
+    #txtBuscador:focus {
+        border-color: #3c8dbc;
+        box-shadow: 0 0 8px rgba(60, 141, 188, 0.3);
+    }
+</style>
+
 <div class="content-wrapper">
     <section class="content-header">
         <h1>
@@ -25,28 +63,35 @@
             </div>
         </div>
 
-        <!-- Verificador de Permisos -->
+        <!-- Buscador de Comandos -->
         <div class="row">
             <div class="col-md-12">
-                <div class="box box-warning">
+                <div class="box box-info">
                     <div class="box-header with-border">
-                        <h3 class="box-title"><i class="fa fa-search"></i> Verificar Permiso</h3>
+                        <h3 class="box-title"><i class="fa fa-search"></i> Buscar Comandos</h3>
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <div class="col-md-8">
-                                <input type="text"
-                                       class="form-control"
-                                       id="txtComando"
-                                       placeholder="Ingresa el comando a verificar (ej: /ver_usuarios, /generar_reporte)">
-                            </div>
-                            <div class="col-md-4">
-                                <button class="btn btn-warning btn-block" id="btnVerificar">
-                                    <i class="fa fa-search"></i> Verificar Permiso
-                                </button>
+                            <div class="col-md-12">
+                                <div class="input-group">
+                                    <span class="input-group-addon"><i class="fa fa-filter"></i></span>
+                                    <input type="text"
+                                           class="form-control input-lg"
+                                           id="txtBuscador"
+                                           placeholder="Buscar por nombre de comando, sintaxis, descripción o módulo...">
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-default btn-lg" id="btnLimpiar" type="button">
+                                            <i class="fa fa-times"></i> Limpiar
+                                        </button>
+                                    </span>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fa fa-info-circle"></i>
+                                    Escribe para filtrar entre tus comandos disponibles. Ejemplo: "usuario", "/ver", "reportes"
+                                </small>
                             </div>
                         </div>
-                        <div id="resultadoVerificacion" style="margin-top: 15px; display: none;"></div>
+                        <div id="estadisticasBusqueda" style="margin-top: 10px;"></div>
                     </div>
                 </div>
             </div>
@@ -118,18 +163,25 @@
                     return;
                 }
 
-                let html = '';
+                let html = '<div class="panel-group" id="accordionModulos">';
+                let moduloIndex = 0;
+
                 data.forEach(function(modulo) {
+                    const collapseId = 'collapse' + moduloIndex;
+                    const isFirst = moduloIndex === 0;
+
                     html += `
-                        <div class="panel panel-primary">
-                            <div class="panel-heading">
-                                <h3 class="panel-title">
+                        <div class="panel panel-primary modulo-panel" data-modulo="${modulo.modulo.toLowerCase()}">
+                            <div class="panel-heading" style="cursor: pointer;" data-toggle="collapse" data-parent="#accordionModulos" data-target="#${collapseId}">
+                                <h4 class="panel-title">
                                     <i class="${modulo.moduloIcono || 'fa fa-folder'}"></i>
                                     ${modulo.modulo}
-                                    <span class="badge pull-right">${modulo.operaciones.length} comandos</span>
-                                </h3>
+                                    <span class="badge bg-blue">${modulo.operaciones.length} comandos</span>
+                                    <i class="fa fa-chevron-down pull-right" style="margin-top: 3px;"></i>
+                                </h4>
                             </div>
-                            <div class="panel-body">
+                            <div id="${collapseId}" class="panel-collapse collapse ${isFirst ? 'in' : ''}">
+                                <div class="panel-body">
                                 <div class="table-responsive">
                                     <table class="table table-hover table-condensed">
                                         <thead>
@@ -156,8 +208,10 @@
                             ? '<small class="text-muted">(requiere parámetros)</small>'
                             : '';
 
+                        const searchData = `${op.nombre} ${op.comando} ${op.descripcion || ''} ${modulo.modulo}`.toLowerCase();
+
                         html += `
-                            <tr>
+                            <tr class="comando-row" data-search="${searchData}">
                                 <td><strong>${op.nombre}</strong></td>
                                 <td><code>${op.comando}</code> ${reqParams}</td>
                                 <td>${op.descripcion || '-'}</td>
@@ -171,74 +225,98 @@
                                     </table>
                                 </div>
                             </div>
+                            </div>
                         </div>`;
+
+                    moduloIndex++;
                 });
 
+                html += '</div>';
                 $('#permisosContainer').html(html);
+
+                // Inicializar contador de comandos
+                actualizarEstadisticas();
             });
         }
 
-        // Verificar permiso específico
-        $('#btnVerificar').click(function() {
-            const comando = $('#txtComando').val().trim();
+        // Función para actualizar estadísticas
+        function actualizarEstadisticas() {
+            const totalComandos = $('.comando-row').length;
+            const comandosVisibles = $('.comando-row:visible').length;
+            const modulosVisibles = $('.modulo-panel:visible').length;
 
-            if (!comando) {
-                $('#resultadoVerificacion')
-                    .html('<div class="alert alert-warning"><i class="fa fa-warning"></i> Por favor ingresa un comando.</div>')
-                    .slideDown();
+            if (comandosVisibles === totalComandos) {
+                $('#estadisticasBusqueda').html('');
+            } else {
+                $('#estadisticasBusqueda').html(`
+                    <div class="alert alert-info" style="margin-bottom: 0;">
+                        <i class="fa fa-filter"></i>
+                        Mostrando <strong>${comandosVisibles}</strong> de <strong>${totalComandos}</strong> comandos
+                        en <strong>${modulosVisibles}</strong> módulo(s)
+                    </div>
+                `);
+            }
+        }
+
+        // Buscador de comandos
+        $('#txtBuscador').on('keyup', function() {
+            const searchTerm = $(this).val().toLowerCase().trim();
+
+            if (searchTerm === '') {
+                // Mostrar todo
+                $('.comando-row').show();
+                $('.modulo-panel').show();
+                $('.panel-collapse').collapse('hide');
+                $('#collapse0').collapse('show');
+                actualizarEstadisticas();
                 return;
             }
 
-            $.get(`/api/mis-permisos/verificar/${encodeURIComponent(comando)}`, function(data) {
-                let html = '';
+            // Ocultar todas las filas primero
+            $('.comando-row').hide();
 
-                if (data.tienePermiso) {
-                    html = `
-                        <div class="alert alert-success">
-                            <h4><i class="fa fa-check-circle"></i> ✓ Tienes permiso para ejecutar este comando</h4>
-                            <hr>
-                            <dl class="dl-horizontal">
-                                <dt>Comando:</dt>
-                                <dd><strong>${data.operacion.nombre}</strong></dd>
-                                <dt>Sintaxis:</dt>
-                                <dd><code>${data.operacion.comando}</code></dd>
-                                <dt>Módulo:</dt>
-                                <dd><i class="${data.operacion.moduloIcono || 'fa fa-folder'}"></i> ${data.operacion.modulo}</dd>
-                                <dt>Descripción:</dt>
-                                <dd>${data.operacion.descripcion || '-'}</dd>
-                                ${data.operacion.requiereParametros
-                                    ? '<dt>Parámetros:</dt><dd><span class="label label-warning"><i class="fa fa-info-circle"></i> Requiere parámetros adicionales</span></dd>'
-                                    : ''}
-                                ${data.operacion.tienePoder
-                                    ? '<dt>Nivel de Acceso:</dt><dd><i class="fa fa-bolt text-yellow"></i> <strong>Crítico</strong> - Requiere autorización especial</dd>'
-                                    : '<dt>Nivel de Acceso:</dt><dd><i class="fa fa-check text-green"></i> <strong>Normal</strong> - Sin restricciones adicionales</dd>'}
-                            </dl>
-                        </div>`;
-                } else {
-                    html = `
-                        <div class="alert alert-danger">
-                            <h4><i class="fa fa-times-circle"></i> No tienes permiso para ejecutar este comando</h4>
-                            <p>El comando <code>${comando}</code> no está disponible para tu usuario.</p>
-                            <p class="text-muted">
-                                <small>Si crees que deberías tener acceso a este comando,
-                                contacta con el administrador del sistema.</small>
-                            </p>
-                        </div>`;
+            // Mostrar filas que coinciden
+            $('.comando-row').each(function() {
+                const searchData = $(this).data('search');
+                if (searchData.indexOf(searchTerm) !== -1) {
+                    $(this).show();
                 }
-
-                $('#resultadoVerificacion').html(html).slideDown();
-            }).fail(function() {
-                $('#resultadoVerificacion')
-                    .html('<div class="alert alert-danger"><i class="fa fa-error"></i> Error al verificar el permiso.</div>')
-                    .slideDown();
             });
+
+            // Mostrar/ocultar módulos según si tienen comandos visibles
+            $('.modulo-panel').each(function() {
+                const $panel = $(this);
+                const visibleRows = $panel.find('.comando-row:visible').length;
+
+                if (visibleRows > 0) {
+                    $panel.show();
+                    // Expandir automáticamente módulos con resultados
+                    $panel.find('.panel-collapse').collapse('show');
+                } else {
+                    $panel.hide();
+                }
+            });
+
+            actualizarEstadisticas();
         });
 
-        // Permitir verificar con Enter
-        $('#txtComando').keypress(function(e) {
-            if (e.which === 13) {
-                $('#btnVerificar').click();
-            }
+        // Limpiar búsqueda
+        $('#btnLimpiar').click(function() {
+            $('#txtBuscador').val('');
+            $('.comando-row').show();
+            $('.modulo-panel').show();
+            $('.panel-collapse').collapse('hide');
+            $('#collapse0').collapse('show');
+            actualizarEstadisticas();
+        });
+
+        // Animación del chevron al colapsar/expandir
+        $(document).on('show.bs.collapse', '.panel-collapse', function() {
+            $(this).prev('.panel-heading').find('.fa-chevron-down').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+        });
+
+        $(document).on('hide.bs.collapse', '.panel-collapse', function() {
+            $(this).prev('.panel-heading').find('.fa-chevron-up').removeClass('fa-chevron-up').addClass('fa-chevron-down');
         });
     });
 </script>
