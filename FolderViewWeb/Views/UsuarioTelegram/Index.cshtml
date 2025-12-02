@@ -38,6 +38,73 @@
     </section>
 </div>
 
+<!-- Modal Pendientes de Verificación -->
+<div class="modal fade" id="modalPendientes" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">
+                    <i class="fa fa-clock-o"></i> Cuentas Pendientes de Verificación
+                </h4>
+            </div>
+            <div class="modal-body" id="pendientesContent">
+                <p class="text-center"><i class="fa fa-spinner fa-spin"></i> Cargando...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cambiar Estado -->
+<div class="modal fade" id="modalCambiarEstado" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">
+                    <i class="fa fa-exchange"></i> Cambiar Estado de Cuenta
+                </h4>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="idCuentaEstado">
+                <div class="form-group">
+                    <label>Usuario:</label>
+                    <p id="usuarioNombre" class="form-control-static"><strong></strong></p>
+                </div>
+                <div class="form-group">
+                    <label>Cuenta Telegram:</label>
+                    <p id="telegramInfo" class="form-control-static"></p>
+                </div>
+                <div class="form-group">
+                    <label>Seleccione el nuevo estado:</label>
+                    <select class="form-control" id="nuevoEstado">
+                        <option value="ACTIVO">
+                            <i class="fa fa-check-circle"></i> ACTIVO - Cuenta operativa
+                        </option>
+                        <option value="SUSPENDIDO">
+                            <i class="fa fa-pause-circle"></i> SUSPENDIDO - Temporalmente inhabilitada
+                        </option>
+                        <option value="BLOQUEADO">
+                            <i class="fa fa-ban"></i> BLOQUEADO - Cuenta bloqueada permanentemente
+                        </option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Motivo (opcional):</label>
+                    <textarea class="form-control" id="motivoCambio" rows="3" placeholder="Describe el motivo del cambio de estado..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnConfirmarEstado">Cambiar Estado</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     $(document).ready(function () {
         let table = $('#cuentasTable').DataTable({
@@ -112,33 +179,126 @@
 
         $(document).on('click', '.btnCambiarEstado', function() {
             const id = $(this).data('id');
-            const nuevoEstado = prompt('Nuevo estado (ACTIVO/SUSPENDIDO/BLOQUEADO):');
-            if (nuevoEstado) {
-                $.ajax({
-                    url: `/api/telegram-accounts/${id}/estado`,
-                    type: 'PUT',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ estado: nuevoEstado.toUpperCase() }),
-                    success: function() {
-                        table.ajax.reload();
-                    }
-                });
-            }
+
+            // Obtener datos de la fila actual
+            const rowData = table.row($(this).parents('tr')).data();
+
+            // Llenar el modal con la información
+            $('#idCuentaEstado').val(id);
+            $('#usuarioNombre strong').text(rowData.usuario);
+            $('#telegramInfo').html(`<strong>@${rowData.telegramUsername}</strong><br><small>${rowData.telegramFirstName} ${rowData.telegramLastName || ''}</small>`);
+            $('#nuevoEstado').val(rowData.estado);
+            $('#motivoCambio').val('');
+
+            // Mostrar el modal
+            $('#modalCambiarEstado').modal('show');
+        });
+
+        $('#btnConfirmarEstado').click(function() {
+            const id = $('#idCuentaEstado').val();
+            const nuevoEstado = $('#nuevoEstado').val();
+            const motivo = $('#motivoCambio').val();
+
+            $.ajax({
+                url: `/api/telegram-accounts/${id}/estado`,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    estado: nuevoEstado,
+                    motivo: motivo
+                }),
+                success: function() {
+                    $('#modalCambiarEstado').modal('hide');
+                    table.ajax.reload();
+
+                    // Mostrar notificación de éxito
+                    const estadoLabel = nuevoEstado === 'ACTIVO' ? 'success' : (nuevoEstado === 'SUSPENDIDO' ? 'warning' : 'danger');
+                    const mensaje = `<div class="alert alert-${estadoLabel} alert-dismissible" style="position:fixed;top:70px;right:20px;z-index:9999;min-width:300px;">
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                        <strong>¡Estado actualizado!</strong> La cuenta ahora está en estado: ${nuevoEstado}
+                    </div>`;
+                    $('body').append(mensaje);
+                    setTimeout(function() {
+                        $('.alert').fadeOut();
+                    }, 3000);
+                },
+                error: function() {
+                    alert('Error al cambiar el estado. Intente nuevamente.');
+                }
+            });
         });
 
         $('#btnPendientes').click(function() {
+            $('#pendientesContent').html('<p class="text-center"><i class="fa fa-spinner fa-spin"></i> Cargando...</p>');
+            $('#modalPendientes').modal('show');
+
             $.get('/api/telegram-accounts/pendientes-verificacion', function(data) {
                 if (data.length === 0) {
-                    alert('No hay cuentas pendientes de verificación');
+                    $('#pendientesContent').html(`
+                        <div class="alert alert-success">
+                            <i class="fa fa-check-circle"></i>
+                            <strong>¡Todo al día!</strong> No hay cuentas pendientes de verificación.
+                        </div>
+                    `);
                     return;
                 }
-                let html = '<h4>Cuentas Pendientes:</h4><ul>';
+
+                let html = `
+                    <div class="alert alert-warning">
+                        <i class="fa fa-exclamation-triangle"></i>
+                        Se encontraron <strong>${data.length}</strong> cuenta(s) pendiente(s) de verificación.
+                    </div>
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Telegram</th>
+                                <th>Tiempo sin verificar</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
                 data.forEach(function(c) {
-                    html += `<li>${c.usuario} - @@${c.telegramUsername} (${c.horasSinVerificar}h sin verificar)</li>`;
+                    const horasColor = c.horasSinVerificar > 24 ? 'text-danger' : (c.horasSinVerificar > 12 ? 'text-warning' : 'text-info');
+                    html += `
+                        <tr>
+                            <td><strong>${c.usuario}</strong><br><small>${c.email || ''}</small></td>
+                            <td>@${c.telegramUsername}<br><small>${c.telegramFirstName} ${c.telegramLastName || ''}</small></td>
+                            <td><span class="${horasColor}"><strong>${c.horasSinVerificar}h</strong></span></td>
+                            <td>
+                                <button class="btn btn-xs btn-success btnVerificarPendiente" data-id="${c.idUsuarioTelegram}">
+                                    <i class="fa fa-check"></i> Verificar
+                                </button>
+                            </td>
+                        </tr>
+                    `;
                 });
-                html += '</ul>';
-                alert(html);
+
+                html += '</tbody></table>';
+                $('#pendientesContent').html(html);
+            }).fail(function() {
+                $('#pendientesContent').html(`
+                    <div class="alert alert-danger">
+                        <i class="fa fa-exclamation-circle"></i>
+                        Error al cargar las cuentas pendientes.
+                    </div>
+                `);
             });
+        });
+
+        // Verificar desde el modal de pendientes
+        $(document).on('click', '.btnVerificarPendiente', function() {
+            if (confirm('¿Verificar esta cuenta?')) {
+                const id = $(this).data('id');
+                $.post(`/api/telegram-accounts/${id}/verificar`, function() {
+                    // Recargar la lista de pendientes
+                    $('#btnPendientes').click();
+                    // Recargar la tabla principal
+                    table.ajax.reload();
+                });
+            }
         });
     });
 </script>
