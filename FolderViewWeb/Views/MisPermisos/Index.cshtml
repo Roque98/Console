@@ -134,22 +134,21 @@
 
                 let html = '<div class="row">';
                 data.forEach(function(rol) {
-                    html += `
-                        <div class="col-md-4">
-                            <div class="info-box bg-green">
-                                <span class="info-box-icon"><i class="fa fa-shield"></i></span>
-                                <div class="info-box-content">
-                                    <span class="info-box-text">${rol.nombre}</span>
-                                    <span class="info-box-number">${rol.totalPermisos} permisos</span>
-                                    <div class="progress">
-                                        <div class="progress-bar" style="width: 100%"></div>
-                                    </div>
-                                    <span class="progress-description">
-                                        Nivel ${rol.nivel} - ${rol.descripcion}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>`;
+                    html += '<div class="col-md-4">' +
+                            '<div class="info-box bg-green">' +
+                                '<span class="info-box-icon"><i class="fa fa-shield"></i></span>' +
+                                '<div class="info-box-content">' +
+                                    '<span class="info-box-text">' + rol.nombre + '</span>' +
+                                    '<span class="info-box-number">' + rol.totalPermisos + ' permisos</span>' +
+                                    '<div class="progress">' +
+                                        '<div class="progress-bar" style="width: 100%"></div>' +
+                                    '</div>' +
+                                    '<span class="progress-description">' +
+                                        'Nivel ' + rol.nivel + ' - ' + rol.descripcion +
+                                    '</span>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>';
                 });
                 html += '</div>';
                 $('#rolesContainer').html(html);
@@ -170,30 +169,29 @@
                     const collapseId = 'collapse' + moduloIndex;
                     const isFirst = moduloIndex === 0;
 
-                    html += `
-                        <div class="panel panel-primary modulo-panel" data-modulo="${modulo.modulo.toLowerCase()}">
-                            <div class="panel-heading" style="cursor: pointer;" data-toggle="collapse" data-parent="#accordionModulos" data-target="#${collapseId}">
-                                <h4 class="panel-title">
-                                    <i class="${modulo.moduloIcono || 'fa fa-folder'}"></i>
-                                    ${modulo.modulo}
-                                    <span class="badge bg-blue">${modulo.operaciones.length} comandos</span>
-                                    <i class="fa fa-chevron-down pull-right" style="margin-top: 3px;"></i>
-                                </h4>
-                            </div>
-                            <div id="${collapseId}" class="panel-collapse collapse ${isFirst ? 'in' : ''}">
-                                <div class="panel-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover table-condensed">
-                                        <thead>
-                                            <tr>
-                                                <th>Comando</th>
-                                                <th>Sintaxis</th>
-                                                <th>Descripción</th>
-                                                <th>Tipo</th>
-                                                <th style="text-align:center;">Nivel de Acceso</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>`;
+                    html += '<div class="panel panel-primary modulo-panel" data-modulo="' + modulo.modulo.toLowerCase() + '">' +
+                            '<div class="panel-heading" style="cursor: pointer;" data-toggle="collapse" data-parent="#accordionModulos" data-target="#' + collapseId + '">' +
+                                '<h4 class="panel-title">' +
+                                    '<i class="' + (modulo.moduloIcono || 'fa fa-folder') + '"></i> ' +
+                                    modulo.modulo +
+                                    ' <span class="badge bg-blue">' + modulo.operaciones.length + ' comandos</span>' +
+                                    ' <i class="fa fa-chevron-down pull-right" style="margin-top: 3px;"></i>' +
+                                '</h4>' +
+                            '</div>' +
+                            '<div id="' + collapseId + '" class="panel-collapse collapse ' + (isFirst ? 'in' : '') + '">' +
+                                '<div class="panel-body">' +
+                                '<div class="table-responsive">' +
+                                    '<table class="table table-hover table-condensed">' +
+                                        '<thead>' +
+                                            '<tr>' +
+                                                '<th>Comando</th>' +
+                                                '<th>Sintaxis</th>' +
+                                                '<th>Descripción</th>' +
+                                                '<th>Tipo</th>' +
+                                                '<th style="text-align:center;">Nivel de Acceso</th>' +
+                                            '</tr>' +
+                                        '</thead>' +
+                                        '<tbody>';
 
                     modulo.operaciones.forEach(function(op) {
                         const tipoBadge = op.tipoPermiso === 'ROL'
@@ -208,25 +206,23 @@
                             ? '<small class="text-muted">(requiere parámetros)</small>'
                             : '';
 
-                        const searchData = `${op.nombre} ${op.comando} ${op.descripcion || ''} ${modulo.modulo}`.toLowerCase();
+                        const searchData = (op.nombre + ' ' + op.comando + ' ' + (op.descripcion || '') + ' ' + modulo.modulo).toLowerCase();
 
-                        html += `
-                            <tr class="comando-row" data-search="${searchData}">
-                                <td><strong>${op.nombre}</strong></td>
-                                <td><code>${op.comando}</code> ${reqParams}</td>
-                                <td>${op.descripcion || '-'}</td>
-                                <td>${tipoBadge}</td>
-                                <td class="text-center">${poderIcon}</td>
-                            </tr>`;
+                        html += '<tr class="comando-row" data-search="' + searchData + '">' +
+                                '<td><strong>' + op.nombre + '</strong></td>' +
+                                '<td><code>' + op.comando + '</code> ' + reqParams + '</td>' +
+                                '<td>' + (op.descripcion || '-') + '</td>' +
+                                '<td>' + tipoBadge + '</td>' +
+                                '<td class="text-center">' + poderIcon + '</td>' +
+                            '</tr>';
                     });
 
-                    html += `
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            </div>
-                        </div>`;
+                    html += '</tbody>' +
+                                    '</table>' +
+                                '</div>' +
+                            '</div>' +
+                            '</div>' +
+                        '</div>';
 
                     moduloIndex++;
                 });
@@ -248,13 +244,13 @@
             if (comandosVisibles === totalComandos) {
                 $('#estadisticasBusqueda').html('');
             } else {
-                $('#estadisticasBusqueda').html(`
-                    <div class="alert alert-info" style="margin-bottom: 0;">
-                        <i class="fa fa-filter"></i>
-                        Mostrando <strong>${comandosVisibles}</strong> de <strong>${totalComandos}</strong> comandos
-                        en <strong>${modulosVisibles}</strong> módulo(s)
-                    </div>
-                `);
+                $('#estadisticasBusqueda').html(
+                    '<div class="alert alert-info" style="margin-bottom: 0;">' +
+                        '<i class="fa fa-filter"></i> ' +
+                        'Mostrando <strong>' + comandosVisibles + '</strong> de <strong>' + totalComandos + '</strong> comandos ' +
+                        'en <strong>' + modulosVisibles + '</strong> módulo(s)' +
+                    '</div>'
+                );
             }
         }
 
