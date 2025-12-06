@@ -28,9 +28,14 @@
                 <div class="box box-success">
                     <div class="box-header with-border">
                         <h3 class="box-title">Entradas de Conocimiento</h3>
-                        <button type="button" class="btn btn-primary pull-right" id="btnNueva">
-                            <i class="fa fa-plus"></i> Nueva Entrada
-                        </button>
+                        <div class="pull-right">
+                            <button type="button" class="btn btn-success" id="btnProcesarPDF" style="margin-right: 5px;">
+                                <i class="fa fa-file-pdf-o"></i> Procesar PDF con IA
+                            </button>
+                            <button type="button" class="btn btn-primary" id="btnNueva">
+                                <i class="fa fa-plus"></i> Nueva Entrada
+                            </button>
+                        </div>
                     </div>
                     <div class="box-body">
                         <table id="entradasTable" class="table table-bordered table-striped">
@@ -142,6 +147,52 @@
     </div>
 </div>
 
+<!-- Modal Procesar PDF -->
+<div class="modal fade" id="pdfModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Procesar PDF con IA</h4>
+            </div>
+            <div class="modal-body">
+                <form id="pdfForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Archivo PDF</label>
+                        <input type="file" class="form-control" id="pdfFile" accept=".pdf" required>
+                        <small class="text-muted">
+                            Sube un archivo PDF que contenga preguntas y respuestas, documentación o información relevante.
+                            La IA lo procesará y generará entradas automáticamente.
+                        </small>
+                    </div>
+                    <div class="form-group">
+                        <label>Categoría destino</label>
+                        <select class="form-control" id="pdfCategoryId" required></select>
+                        <small class="text-muted">
+                            Las entradas generadas se asignarán a esta categoría.
+                        </small>
+                    </div>
+                    <div class="callout callout-info">
+                        <h4><i class="fa fa-info-circle"></i> Cómo funciona</h4>
+                        <p>
+                            1. El sistema extraerá el texto del PDF<br>
+                            2. Enviará el contenido a la IA configurada<br>
+                            3. La IA identificará preguntas, respuestas y conceptos clave<br>
+                            4. Se crearán automáticamente las entradas en la Knowledge Base
+                        </p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btnProcesarPDFArchivo">
+                    <i class="fa fa-magic"></i> Procesar con IA
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     $(document).ready(function () {
         cargarCategorias();
@@ -151,8 +202,10 @@
             $.get('/api/knowledge/categories', function(cats) {
                 const list = $('#categoriesList');
                 const select = $('#categoryId');
+                const pdfSelect = $('#pdfCategoryId');
                 list.empty();
                 select.empty();
+                pdfSelect.empty();
 
                 cats.forEach(function(cat) {
                     list.append(`
@@ -162,6 +215,7 @@
                         </a>
                     `);
                     select.append(`<option value="${cat.id}">${cat.displayName}</option>`);
+                    pdfSelect.append(`<option value="${cat.id}">${cat.displayName}</option>`);
                 });
 
                 cargarEntradas();
@@ -313,6 +367,57 @@
                 $('#catIcon').val(cat.icon);
                 $('#categoriaModal .modal-title').text('Editar Categoría');
                 $('#categoriaModal').modal('show');
+            });
+        });
+
+        // Procesar PDF con IA
+        $('#btnProcesarPDF').click(function() {
+            $('#pdfModal').modal('show');
+        });
+
+        $('#btnProcesarPDFArchivo').click(function() {
+            const fileInput = $('#pdfFile')[0];
+            if (!fileInput.files.length) {
+                alert('Por favor selecciona un archivo PDF');
+                return;
+            }
+
+            const categoryId = $('#pdfCategoryId').val();
+            if (!categoryId) {
+                alert('Por favor selecciona una categoría');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('pdfFile', fileInput.files[0]);
+            formData.append('categoryId', categoryId);
+
+            // Mostrar indicador de carga
+            $('#btnProcesarPDFArchivo').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Procesando...');
+
+            $.ajax({
+                url: '/api/knowledge/process-pdf',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        alert('PDF procesado exitosamente. Se crearon ' + response.entriesCreated + ' entradas.');
+                        $('#pdfModal').modal('hide');
+                        $('#pdfFile').val('');
+                        table.ajax.reload();
+                        cargarCategorias();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error al procesar el PDF: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Error desconocido'));
+                },
+                complete: function() {
+                    $('#btnProcesarPDFArchivo').prop('disabled', false).html('<i class="fa fa-magic"></i> Procesar con IA');
+                }
             });
         });
     });
